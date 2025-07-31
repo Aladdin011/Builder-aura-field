@@ -7,7 +7,7 @@ const createTransporter = () => {
 
   if (isDevelopment && process.env.EMAIL_PROVIDER === "ethereal") {
     // Use Ethereal for development testing
-    return nodemailer.createTransporter({
+    return nodemailer.createTransport({
       host: "smtp.ethereal.email",
       port: 587,
       auth: {
@@ -20,7 +20,7 @@ const createTransporter = () => {
   // Production configuration for various providers
   switch (process.env.EMAIL_PROVIDER) {
     case "gmail":
-      return nodemailer.createTransporter({
+      return nodemailer.createTransport({
         service: "gmail",
         auth: {
           user: process.env.GMAIL_USER,
@@ -29,7 +29,7 @@ const createTransporter = () => {
       });
 
     case "sendgrid":
-      return nodemailer.createTransporter({
+      return nodemailer.createTransport({
         host: "smtp.sendgrid.net",
         port: 587,
         auth: {
@@ -39,7 +39,7 @@ const createTransporter = () => {
       });
 
     case "mailgun":
-      return nodemailer.createTransporter({
+      return nodemailer.createTransport({
         host: "smtp.mailgun.org",
         port: 587,
         auth: {
@@ -49,7 +49,7 @@ const createTransporter = () => {
       });
 
     case "ses":
-      return nodemailer.createTransporter({
+      return nodemailer.createTransport({
         host: "email-smtp.us-east-1.amazonaws.com",
         port: 587,
         auth: {
@@ -60,7 +60,7 @@ const createTransporter = () => {
 
     default:
       // SMTP configuration
-      return nodemailer.createTransporter({
+      return nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || "587"),
         secure: process.env.SMTP_SECURE === "true",

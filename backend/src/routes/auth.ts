@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -101,8 +102,9 @@ router.post(
     });
 
     // Store OTP for verification
-    await prisma.oTPVerification.create({
+    await prisma.otpVerification.create({
       data: {
+        userId: user.id,
         email: email.toLowerCase(),
         otp: emailOTP,
         type: "EMAIL_VERIFICATION",
@@ -112,10 +114,15 @@ router.post(
 
     // Send verification email
     try {
-      await sendEmail(email, "Verify Your Email Address", "emailVerification", {
-        firstName,
-        verificationCode: emailOTP,
-        companyName: "JD Marc Limited",
+      await sendEmail({
+        to: email,
+        subject: "Verify Your Email Address",
+        template: "emailVerification",
+        data: {
+          firstName,
+          verificationCode: emailOTP,
+          companyName: "JD Marc Limited",
+        },
       });
     } catch (emailError) {
       logger.error("Failed to send verification email", {
@@ -189,26 +196,24 @@ router.post(
       expiresAt.setDate(expiresAt.getDate() + 1); // 1 day
     }
 
+    // Create session placeholder to get sessionId for tokens
+    const sessionId = crypto.randomUUID();
+    
+    // Generate tokens with sessionId
+    const tokens = generateTokens(user.id, sessionId);
+
     const session = await prisma.userSession.create({
       data: {
+        id: sessionId,
         userId: user.id,
+        token: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
         deviceInfo: deviceInfo || "Unknown Device",
         ipAddress: req.ip || null,
         userAgent: req.get("User-Agent") || null,
         expiresAt,
         isActive: true,
         lastActivity: new Date(),
-      },
-    });
-
-    // Generate tokens
-    const tokens = generateTokens(user.id, session.id);
-
-    // Update session with refresh token
-    await prisma.userSession.update({
-      where: { id: session.id },
-      data: {
-        refreshToken: tokens.refreshToken,
       },
     });
 
@@ -253,7 +258,7 @@ router.post(
     const { email, otp, type } = req.body;
 
     // Find OTP record
-    const otpRecord = await prisma.oTPVerification.findFirst({
+    const otpRecord = await prisma.otpVerification.findFirst({
       where: {
         email: email.toLowerCase(),
         otp,
@@ -273,7 +278,7 @@ router.post(
     }
 
     // Mark OTP as used
-    await prisma.oTPVerification.update({
+    await prisma.otpVerification.update({
       where: { id: otpRecord.id },
       data: { isUsed: true },
     });
@@ -352,7 +357,7 @@ router.post(
       where: { id: sessionId },
       data: {
         isActive: false,
-        refreshToken: null,
+        refreshToken: { set: null },
       },
     });
 
