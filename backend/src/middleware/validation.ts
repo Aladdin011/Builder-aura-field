@@ -9,7 +9,7 @@ export const handleValidationErrors = (
   req: Request,
   res: Response,
   next: NextFunction,
-): void => {
+): void | Response => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -391,7 +391,7 @@ export const validatePaginationQuery = (
   req: Request,
   res: Response,
   next: NextFunction,
-): void => {
+): void | Response => {
   const { page, limit } = req.query;
 
   if (page && (isNaN(Number(page)) || Number(page) < 1)) {
@@ -423,7 +423,7 @@ export const validateFileUpload = (
   allowedTypes: string[],
   maxSize: number = 5 * 1024 * 1024,
 ) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return (req: Request, res: Response, next: NextFunction): void | Response => {
     if (!req.file && !req.files) {
       return res.status(400).json({
         success: false,

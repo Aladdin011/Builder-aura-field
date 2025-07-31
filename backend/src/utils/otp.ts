@@ -32,8 +32,8 @@ export const validateSecureOTP = (otp: string, length: number = 8): boolean => {
 // Verify OTP (alias for validateOTP for backward compatibility)
 export const verifyOTP = validateOTP;
 
-// Check if OTP is expired
-export const isOTPExpired = (
+// Check if OTP is expired (legacy function for backward compatibility)
+export const isOTPExpiredLegacy = (
   createdAt: Date,
   expiryMinutes: number = 15,
 ): boolean => {

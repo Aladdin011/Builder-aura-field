@@ -41,14 +41,14 @@ export const generateTokens = (
 ): TokenPair => {
   const accessToken = jwt.sign(
     { userId, sessionId, type: "access" },
-    process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN || "15m" },
+    process.env.JWT_SECRET as string,
+    { expiresIn: process.env.JWT_EXPIRES_IN || "15m" } as jwt.SignOptions,
   );
 
   const refreshToken = jwt.sign(
     { userId, sessionId, type: "refresh" },
-    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d" },
+    (process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET) as string,
+    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d" } as jwt.SignOptions,
   );
 
   return {
@@ -65,7 +65,7 @@ export const authenticateToken = async (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): Promise<void | Response> => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -195,7 +195,7 @@ export const optionalAuth = async (
  * Role-based access control middleware
  */
 export const requireRole = (allowedRoles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void | Response => {
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -232,7 +232,7 @@ export const requireEmailVerification = async (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): Promise<void | Response> => {
   if (!req.user) {
     return res.status(401).json({
       success: false,
@@ -308,7 +308,7 @@ export const invalidateSession = async (sessionId: string): Promise<void> => {
     where: { id: sessionId },
     data: {
       isActive: false,
-      refreshToken: null, // Clear refresh token
+      refreshToken: { set: null }, // Clear refresh token
     },
   });
 };
@@ -323,7 +323,7 @@ export const invalidateAllUserSessions = async (
     where: { userId },
     data: {
       isActive: false,
-      refreshToken: null,
+      refreshToken: { set: null },
     },
   });
 };

@@ -7,6 +7,8 @@
     "dev": "nodemon src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "railway:build": "npx prisma generate && npm run build",
+    "railway:deploy": "npx prisma migrate deploy && npm start",
     "test": "jest",
     "test:watch": "jest --watch",
     "prisma:generate": "prisma generate",

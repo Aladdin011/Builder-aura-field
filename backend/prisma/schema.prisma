@@ -18,10 +18,13 @@ model User {
   lastName          String
   phone             String?
   avatar            String?
+  company           String?
   role              UserRole           @default(CLIENT)
   isEmailVerified   Boolean            @default(false)
   isActive          Boolean            @default(true)
   lastLogin         DateTime?
+  lastLoginAt       DateTime?
+  emailVerifiedAt   DateTime?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   
@@ -82,11 +85,12 @@ model UserSession {
   id              String    @id @default(uuid())
   userId          String
   token           String    @unique
-  refreshToken    String    @unique
+  refreshToken    String?   @unique
   deviceInfo      String?
   ipAddress       String?
   userAgent       String?
   isActive        Boolean   @default(true)
+  lastActivity    DateTime  @default(now())
   expiresAt       DateTime
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -202,6 +206,7 @@ model ContactForm {
   notes           String?
   followUpDate    DateTime?
   isRead          Boolean       @default(false)
+  leadScore       Float?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   
@@ -263,12 +268,15 @@ model UserAnalytics {
   sessionCount      Int       @default(0)
   totalTimeOnSite   Int       @default(0) // in seconds
   lastVisit         DateTime?
+  ipAddress         String?
+  userAgent         String?
   deviceType        String?   // mobile, tablet, desktop
   browser           String?
   os                String?
   country           String?
   city              String?
   referrer          String?
+  source            String?
   utmSource         String?
   utmMedium         String?
   utmCampaign       String?
@@ -337,6 +345,7 @@ model EmailTemplate {
 enum UserRole {
   SUPER_ADMIN
   ADMIN
+  MANAGER
   PROJECT_MANAGER
   CONTRACTOR
   ARCHITECT
@@ -359,6 +368,7 @@ enum ProjectCategory {
   SMART_CITIES
   RENOVATION
   INTERIOR_DESIGN
+  CONSULTATION
 }
 
 enum ProjectStatus {
@@ -398,9 +408,11 @@ enum TimelineStatus {
 enum ContactStatus {
   NEW
   CONTACTED
+  IN_PROGRESS
   QUALIFIED
   PROPOSAL_SENT
   NEGOTIATING
+  COMPLETED
   WON
   LOST
   ARCHIVED

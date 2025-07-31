@@ -158,7 +158,9 @@ export const createError = (
 ): AppError => {
   const error: AppError = new Error(message);
   error.statusCode = statusCode;
-  error.code = code;
+  if (code) {
+    error.code = code;
+  }
   error.details = details;
   error.isOperational = true;
   return error;

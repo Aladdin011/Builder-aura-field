@@ -22,6 +22,9 @@ interface LeadScoringInput {
   contactFormSubmission?: boolean;
   projectType?: string;
   budget?: string;
+  timeline?: string;
+  hasPhone?: boolean;
+  hasCompany?: boolean;
   company?: boolean;
   timeOfDay?: "morning" | "afternoon" | "evening";
   location?: string;

@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import crypto from "crypto";
 import { z } from "zod";
 import { prisma } from "../utils/database";
 import { sendEmail } from "../utils/email";
@@ -77,7 +78,8 @@ router.post(
     } = validatedData;
 
     // Calculate lead score
-    const leadScore = await createLeadScore({
+    const tempUserId = crypto.randomUUID();
+    const leadScore = await createLeadScore(tempUserId, {
       projectType,
       budget,
       timeline,
@@ -112,18 +114,18 @@ router.post(
 
     // Send confirmation email to user
     try {
-      await sendEmail(
-        email,
-        "Thank you for contacting JD Marc Limited",
-        "contactConfirmation",
-        {
+      await sendEmail({
+        to: email,
+        subject: "Thank you for contacting JD Marc Limited",
+        template: "contactConfirmation",
+        data: {
           name,
           subject,
           message,
           contactId: contactForm.id,
           companyName: "JD Marc Limited",
         },
-      );
+      });
     } catch (emailError) {
       logger.error("Failed to send confirmation email", {
         contactId: contactForm.id,
@@ -135,11 +137,11 @@ router.post(
     // Send notification email to admin
     try {
       const adminEmail = process.env.ADMIN_EMAIL || "admin@jdmarc.com";
-      await sendEmail(
-        adminEmail,
-        `New Contact Form Submission - ${subject}`,
-        "newContactNotification",
-        {
+      await sendEmail({
+        to: adminEmail,
+        subject: `New Contact Form Submission - ${subject}`,
+        template: "newContactNotification",
+        data: {
           name,
           email,
           phone,
@@ -150,11 +152,11 @@ router.post(
           budget,
           timeline,
           location,
-          leadScore: leadScore.score,
-          priority: leadScore.priority,
+          leadScore: leadScore.totalScore,
+          priority: leadScore.classification,
           contactId: contactForm.id,
         },
-      );
+      });
     } catch (emailError) {
       logger.error("Failed to send admin notification email", {
         contactId: contactForm.id,
