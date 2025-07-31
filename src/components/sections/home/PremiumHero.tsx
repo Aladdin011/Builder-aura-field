@@ -1,20 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { ChevronRight, Play, ArrowDown, Sparkles, Zap, Globe } from 'lucide-react';
+import { ChevronRight, ArrowDown, Building, MapPin, Phone, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/stores/appStore';
 import { useAdvancedAnimations } from '@/lib/advancedAnimations';
 
-// Animated background particles
-const FloatingParticle = ({ delay, duration, x, y }: { delay: number; duration: number; x: number; y: number }) => (
+// Floating elements for visual interest
+const FloatingElement = ({ delay, duration, x, y, color }: { 
+  delay: number; 
+  duration: number; 
+  x: number; 
+  y: number; 
+  color: string;
+}) => (
   <motion.div
-    className="absolute w-2 h-2 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full opacity-20"
+    className={`absolute w-3 h-3 ${color} rounded-full opacity-30 blur-sm`}
     style={{ left: `${x}%`, top: `${y}%` }}
     animate={{
-      y: [0, -30, 0],
-      x: [0, 15, 0],
-      scale: [1, 1.2, 1],
-      opacity: [0.2, 0.6, 0.2],
+      y: [0, -40, 0],
+      x: [0, 20, 0],
+      scale: [1, 1.5, 1],
+      opacity: [0.3, 0.7, 0.3],
     }}
     transition={{
       duration,
@@ -44,9 +50,9 @@ const StatCounter = ({ value, label, suffix = "", prefix = "" }: {
             clearInterval(timer);
             return value;
           }
-          return prev + Math.ceil(value / 50);
+          return prev + Math.ceil(value / 40);
         });
-      }, 30);
+      }, 50);
       return () => clearInterval(timer);
     }
   }, [isInView, value]);
@@ -59,99 +65,34 @@ const StatCounter = ({ value, label, suffix = "", prefix = "" }: {
       animate={isInView ? { opacity: 1, scale: 1 } : {}}
       transition={{ duration: 0.6, delay: 0.2 }}
     >
-      <div className="text-4xl md:text-5xl font-bold text-white mb-2 font-mono">
+      <div className="text-3xl md:text-4xl font-bold text-amber-200 mb-2 font-mono">
         {prefix}{count}{suffix}
       </div>
-      <div className="text-neutral-300 text-sm font-medium">{label}</div>
+      <div className="text-gray-300 text-sm font-medium uppercase tracking-wider">{label}</div>
     </motion.div>
   );
 };
-
-// Platform preview mockup
-const PlatformPreview = () => (
-  <motion.div
-    className="relative w-full max-w-md mx-auto"
-    initial={{ opacity: 0, y: 50 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.8, delay: 1.2 }}
-  >
-    <div className="glass rounded-2xl p-6 border border-white/20">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-3 h-3 rounded-full bg-red-400"></div>
-        <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-        <div className="w-3 h-3 rounded-full bg-green-400"></div>
-      </div>
-      
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 p-3 bg-white/10 rounded-lg">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <div className="h-2 bg-white/30 rounded mb-1"></div>
-            <div className="h-2 bg-white/20 rounded w-3/4"></div>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3 p-3 bg-white/10 rounded-lg">
-          <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-green-600 rounded-lg flex items-center justify-center">
-            <Globe className="w-5 h-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <div className="h-2 bg-white/30 rounded mb-1"></div>
-            <div className="h-2 bg-white/20 rounded w-2/3"></div>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3 p-3 bg-white/10 rounded-lg">
-          <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <div className="h-2 bg-white/30 rounded mb-1"></div>
-            <div className="h-2 bg-white/20 rounded w-4/5"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    {/* Floating elements */}
-    <motion.div
-      className="absolute -top-4 -right-4 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center"
-      animate={{ rotate: 360 }}
-      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-    >
-      <Sparkles className="w-4 h-4 text-white" />
-    </motion.div>
-    
-    <motion.div
-      className="absolute -bottom-4 -left-4 w-6 h-6 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"
-      animate={{ y: [0, -10, 0] }}
-      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-    />
-  </motion.div>
-);
 
 export default function PremiumHero() {
   const heroRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const animations = useAdvancedAnimations();
-  const { personalization, trackUserInteraction } = useAppStore();
+  const { trackUserInteraction } = useAppStore();
   
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
   });
 
-  // Parallax effects
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
+  // Enhanced parallax effects for smooth upward transition
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "80%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
-  // Mouse tracking for interactive elements
+  // Mouse tracking for subtle interactive effects
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (heroRef.current) {
@@ -169,14 +110,14 @@ export default function PremiumHero() {
     }
   }, []);
 
-  const handlePrimaryClick = () => {
-    trackUserInteraction('hero-primary-cta');
-    navigate('/projects');
+  const handleContactClick = () => {
+    trackUserInteraction('hero-contact-cta');
+    navigate('/contact');
   };
 
-  const handleVideoClick = () => {
-    trackUserInteraction('hero-video-cta');
-    setIsVideoModalOpen(true);
+  const handleProjectsClick = () => {
+    trackUserInteraction('hero-projects-cta');
+    navigate('/projects');
   };
 
   const scrollToNext = () => {
@@ -187,141 +128,198 @@ export default function PremiumHero() {
     }
   };
 
-  // Generate floating particles
-  const particles = Array.from({ length: 20 }, (_, i) => ({
+  // Generate floating elements
+  const floatingElements = Array.from({ length: 15 }, (_, i) => ({
     id: i,
-    delay: Math.random() * 5,
-    duration: 4 + Math.random() * 4,
+    delay: Math.random() * 3,
+    duration: 4 + Math.random() * 3,
     x: Math.random() * 100,
     y: Math.random() * 100,
+    color: i % 3 === 0 ? 'bg-amber-400' : i % 3 === 1 ? 'bg-orange-500' : 'bg-yellow-300',
   }));
 
   return (
-    <section ref={heroRef} className="relative min-h-screen overflow-hidden hero-background">
-      {/* Gradient Mesh Background */}
-      <div className="gradient-mesh" />
-      
-      {/* Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {particles.map(particle => (
-          <FloatingParticle key={particle.id} {...particle} />
+    <section ref={heroRef} className="relative min-h-screen overflow-hidden">
+      {/* Background Image with Parallax */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        style={{ y: backgroundY, scale }}
+      >
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(/images/hero-background.jpg)',
+          }}
+        />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/60" />
+        {/* Additional overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+      </motion.div>
+
+      {/* Floating Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+        {floatingElements.map(element => (
+          <FloatingElement key={element.id} {...element} />
         ))}
       </div>
 
       {/* Interactive Mouse Effect */}
       <motion.div
-        className="absolute inset-0 opacity-30 pointer-events-none"
+        className="absolute inset-0 opacity-20 pointer-events-none z-20"
         style={{
-          background: `radial-gradient(600px circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, rgba(124, 88, 65, 0.1), transparent 40%)`,
+          background: `radial-gradient(800px circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, rgba(251, 191, 36, 0.15), transparent 50%)`,
         }}
       />
 
       {/* Main Content */}
-      <div className="container-fluid relative z-10">
+      <div className="container mx-auto px-6 relative z-30">
         <motion.div
           className="min-h-screen flex items-center"
-          style={{ y, opacity, scale }}
+          style={{ y: contentY, opacity }}
         >
-          <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
+          <div className="grid lg:grid-cols-12 gap-8 items-center w-full">
             
-            {/* Left Content */}
+            {/* Left Content - Company Information */}
             <motion.div
-              className="space-y-8"
-              initial={{ opacity: 0, x: -50 }}
+              className="lg:col-span-7 space-y-8"
+              initial={{ opacity: 0, x: -60 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              transition={{ duration: 1, delay: 0.3 }}
             >
-              {/* Premium Badge */}
+              {/* Company Badge */}
               <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 glass rounded-full border border-white/20"
+                className="inline-flex items-center gap-3 px-6 py-3 bg-amber-500/20 backdrop-blur-sm rounded-full border border-amber-400/30"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
               >
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span className="text-white/90 text-sm font-medium">
-                  Building Africa's Future Since 2007
+                <Building className="w-5 h-5 text-amber-400" />
+                <span className="text-amber-200 text-sm font-semibold tracking-wide">
+                  EST. 2007 • BUILDING EXCELLENCE
                 </span>
               </motion.div>
 
-              {/* Hero Title */}
-              <div className="space-y-4">
+              {/* Main Heading */}
+              <div className="space-y-6">
                 <motion.h1
-                  className="text-hero"
-                  initial={{ opacity: 0, y: 30 }}
+                  className="text-6xl md:text-7xl lg:text-8xl font-bold leading-tight"
+                  initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.6 }}
+                  transition={{ duration: 1, delay: 0.7 }}
                 >
-                  Building Africa's
+                  <span className="text-white font-extrabold">JD Marc</span>
                   <br />
-                  <span className="gradient-text">Future Cities</span>
+                  <span className="text-white font-extrabold">Limited</span>
+                  <br />
+                  <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-400 bg-clip-text text-transparent font-black">
+                    Building
+                  </span>
+                  <br />
+                  <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-400 bg-clip-text text-transparent font-black">
+                    Africa's
+                  </span>
+                  <br />
+                  <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-400 bg-clip-text text-transparent font-black">
+                    Future Cities
+                  </span>
                 </motion.h1>
 
                 <motion.p
-                  className="text-body-lg text-neutral-300 max-w-lg leading-relaxed"
-                  initial={{ opacity: 0, y: 20 }}
+                  className="text-xl md:text-2xl text-gray-300 max-w-2xl leading-relaxed font-light"
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.8 }}
+                  transition={{ duration: 1, delay: 0.9 }}
                 >
-                  Connect skilled construction professionals with clients through our 
-                  intelligent remote platform. Modern construction management redefined 
-                  for the digital age.
+                  Pioneering sustainable urban development across Africa with innovative 
+                  construction solutions, intelligent infrastructure, and visionary architecture 
+                  that shapes tomorrow's cities today.
                 </motion.p>
               </div>
 
               {/* CTA Buttons */}
               <motion.div
-                className="flex flex-col sm:flex-row gap-4 items-start"
-                initial={{ opacity: 0, y: 20 }}
+                className="flex flex-col sm:flex-row gap-6 items-start"
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.0 }}
+                transition={{ duration: 1, delay: 1.1 }}
               >
                 <button
-                  onClick={handlePrimaryClick}
-                  className="btn-primary-premium gpu-accelerated group"
+                  onClick={handleProjectsClick}
+                  className="group relative px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl overflow-hidden shadow-2xl transform transition-all duration-300 hover:shadow-amber-500/25 hover:scale-105"
                 >
-                  <span>Start Building</span>
-                  <ChevronRight className="btn-icon" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-400 transform translate-y-full transition-transform duration-300 group-hover:translate-y-0" />
+                  <span className="relative flex items-center gap-3">
+                    View Our Projects
+                    <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  </span>
                 </button>
 
                 <button
-                  onClick={handleVideoClick}
-                  className="btn-secondary-premium group"
+                  onClick={handleContactClick}
+                  className="group px-8 py-4 border-2 border-amber-400 text-amber-400 font-semibold rounded-xl backdrop-blur-sm transition-all duration-300 hover:bg-amber-400 hover:text-black hover:shadow-lg hover:shadow-amber-400/25"
                 >
-                  <Play className="w-5 h-5 transition-transform group-hover:scale-110" />
-                  <span>Watch Demo</span>
+                  <span className="flex items-center gap-3">
+                    Start Your Project
+                    <Phone className="w-5 h-5 transition-transform group-hover:rotate-12" />
+                  </span>
                 </button>
               </motion.div>
 
-              {/* Stats Row */}
+              {/* Quick Contact Info */}
               <motion.div
-                className="grid grid-cols-3 gap-8 pt-8 border-t border-white/20"
+                className="flex flex-wrap gap-6 pt-6 border-t border-white/20"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.2 }}
+                transition={{ duration: 1, delay: 1.3 }}
               >
-                <StatCounter value={500} label="Projects Completed" suffix="+" />
-                <StatCounter value={15} label="Years Experience" suffix="+" />
-                <StatCounter value={50} label="Investment Value" suffix="M+" prefix="$" />
+                <div className="flex items-center gap-3 text-gray-300">
+                  <MapPin className="w-5 h-5 text-amber-400" />
+                  <span className="text-sm font-medium">Lagos, Nigeria</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-300">
+                  <Phone className="w-5 h-5 text-amber-400" />
+                  <span className="text-sm font-medium">+234 (0) 123 456 7890</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-300">
+                  <Mail className="w-5 h-5 text-amber-400" />
+                  <span className="text-sm font-medium">info@jdmarclimited.com</span>
+                </div>
               </motion.div>
             </motion.div>
 
-            {/* Right Content - Platform Preview */}
+            {/* Right Content - Stats */}
             <motion.div
-              className="relative flex items-center justify-center"
-              initial={{ opacity: 0, x: 50 }}
+              className="lg:col-span-5 flex items-center justify-center"
+              initial={{ opacity: 0, x: 60 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+              transition={{ duration: 1, delay: 0.5 }}
             >
-              <PlatformPreview />
+              <div className="bg-black/30 backdrop-blur-lg rounded-3xl p-8 border border-white/10 shadow-2xl">
+                <motion.h3
+                  className="text-2xl font-bold text-amber-400 mb-8 text-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.5 }}
+                >
+                  Our Impact
+                </motion.h3>
+                
+                <div className="grid grid-cols-1 gap-8">
+                  <StatCounter value={500} label="Projects Completed" suffix="+" />
+                  <StatCounter value={17} label="Years of Excellence" suffix="+" />
+                  <StatCounter value={85} label="Investment Value" suffix="M+" prefix="$" />
+                  <StatCounter value={12} label="African Countries" suffix="+" />
+                </div>
+              </div>
             </motion.div>
           </div>
         </motion.div>
       </div>
 
-      {/* Scroll Indicator */}
+      {/* Enhanced Scroll Indicator */}
       <motion.div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer z-20"
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer z-40"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2, duration: 1 }}
@@ -329,54 +327,22 @@ export default function PremiumHero() {
       >
         <motion.div
           className="flex flex-col items-center group"
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 2.5 }}
         >
-          <span className="text-white/60 text-sm mb-3 group-hover:text-white/80 transition-colors">
-            Discover Our Services
+          <span className="text-amber-400 text-sm mb-4 group-hover:text-amber-300 transition-colors font-medium tracking-wider">
+            EXPLORE OUR SERVICES
           </span>
-          <div className="w-px h-12 bg-gradient-to-b from-white/20 to-transparent mb-2" />
+          <div className="w-px h-16 bg-gradient-to-b from-amber-400/60 to-transparent mb-3" />
           <motion.div
-            className="w-8 h-8 border-2 border-white/40 rounded-full flex items-center justify-center group-hover:border-white/60 transition-colors"
+            className="w-12 h-12 border-2 border-amber-400/60 rounded-full flex items-center justify-center group-hover:border-amber-400 transition-colors group-hover:bg-amber-400/10"
             whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <ArrowDown className="w-4 h-4 text-white/60 group-hover:text-white/80 transition-colors" />
+            <ArrowDown className="w-5 h-5 text-amber-400 group-hover:text-amber-300 transition-colors" />
           </motion.div>
         </motion.div>
       </motion.div>
-
-      {/* Video Modal */}
-      {isVideoModalOpen && (
-        <motion.div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          onClick={() => setIsVideoModalOpen(false)}
-        >
-          <motion.div
-            className="relative w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Video content would go here */}
-            <div className="absolute inset-0 flex items-center justify-center text-white">
-              <div className="text-center">
-                <Play className="w-16 h-16 mx-auto mb-4 opacity-60" />
-                <p className="text-lg opacity-80">Demo Video Coming Soon</p>
-              </div>
-            </div>
-            
-            <button
-              onClick={() => setIsVideoModalOpen(false)}
-              className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
-            >
-              ×
-            </button>
-          </motion.div>
-        </motion.div>
-      )}
     </section>
   );
 }
