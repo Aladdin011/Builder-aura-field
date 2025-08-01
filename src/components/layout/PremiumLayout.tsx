@@ -74,19 +74,31 @@ export default function PremiumLayout({
   // Handle page visibility changes for analytics
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        analytics.trackEvent('page', 'blur', {
-          duration: Date.now() - performance.now(),
-        });
-      } else {
-        analytics.trackEvent('page', 'focus', {
-          timestamp: Date.now(),
-        });
+      try {
+        if (document.hidden) {
+          analytics.trackEvent('page', 'blur', {
+            duration: Date.now() - performance.now(),
+          });
+        } else {
+          analytics.trackEvent('page', 'focus', {
+            timestamp: Date.now(),
+          });
+        }
+      } catch (error) {
+        console.warn('Error in visibility change handler:', error);
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange, { passive: true });
+      return () => {
+        try {
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
+        } catch (error) {
+          console.warn('Error removing visibility change listener:', error);
+        }
+      };
+    }
   }, [analytics]);
 
   return (

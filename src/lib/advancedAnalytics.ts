@@ -151,36 +151,56 @@ export class AdvancedAnalyticsEngine {
   
   // User Interaction Tracking
   private setupUserInteractionTracking() {
-    // Click tracking with heat mapping
-    document.addEventListener('click', (event) => {
-      this.trackInteraction('click', event);
-    });
-    
-    // Scroll depth tracking
-    let maxScrollDepth = 0;
-    document.addEventListener('scroll', () => {
-      const scrollDepth = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
-      if (scrollDepth > maxScrollDepth) {
-        maxScrollDepth = scrollDepth;
-        if (scrollDepth % 25 === 0) { // Track at 25%, 50%, 75%, 100%
-          this.trackEvent('engagement', 'scroll_depth', { depth: scrollDepth });
+    try {
+      // Click tracking with heat mapping
+      document.addEventListener('click', (event) => {
+        try {
+          this.trackInteraction('click', event);
+        } catch (error) {
+          console.warn('Click tracking error:', error);
         }
-      }
-    });
-    
-    // Form interaction tracking
-    document.addEventListener('focus', (event) => {
-      if ((event.target as HTMLElement).tagName === 'INPUT' || (event.target as HTMLElement).tagName === 'TEXTAREA') {
-        this.trackInteraction('form_focus', event);
-      }
-    }, true);
-    
-    // Time on page tracking
-    let startTime = Date.now();
-    document.addEventListener('beforeunload', () => {
-      const timeOnPage = Date.now() - startTime;
-      this.trackEvent('engagement', 'time_on_page', { duration: timeOnPage });
-    });
+      }, { passive: true });
+
+      // Scroll depth tracking
+      let maxScrollDepth = 0;
+      document.addEventListener('scroll', () => {
+        try {
+          const scrollDepth = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+          if (scrollDepth > maxScrollDepth) {
+            maxScrollDepth = scrollDepth;
+            if (scrollDepth % 25 === 0) { // Track at 25%, 50%, 75%, 100%
+              this.trackEvent('engagement', 'scroll_depth', { depth: scrollDepth });
+            }
+          }
+        } catch (error) {
+          console.warn('Scroll tracking error:', error);
+        }
+      }, { passive: true });
+
+      // Form interaction tracking
+      document.addEventListener('focus', (event) => {
+        try {
+          if ((event.target as HTMLElement).tagName === 'INPUT' || (event.target as HTMLElement).tagName === 'TEXTAREA') {
+            this.trackInteraction('form_focus', event);
+          }
+        } catch (error) {
+          console.warn('Form interaction tracking error:', error);
+        }
+      }, { passive: true });
+
+      // Time on page tracking
+      let startTime = Date.now();
+      document.addEventListener('beforeunload', () => {
+        try {
+          const timeOnPage = Date.now() - startTime;
+          this.trackEvent('engagement', 'time_on_page', { duration: timeOnPage });
+        } catch (error) {
+          console.warn('Time tracking error:', error);
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to setup user interaction tracking:', error);
+    }
   }
   
   private trackInteraction(type: string, event: Event) {
@@ -249,23 +269,35 @@ export class AdvancedAnalyticsEngine {
   
   // Error Tracking
   private setupErrorTracking() {
-    window.addEventListener('error', (event) => {
-      this.trackEvent('error', 'javascript_error', {
-        message: event.message,
-        filename: event.filename,
-        line: event.lineno,
-        column: event.colno,
-        stack: event.error?.stack,
-        timestamp: new Date()
-      });
-    });
-    
-    window.addEventListener('unhandledrejection', (event) => {
-      this.trackEvent('error', 'promise_rejection', {
-        reason: event.reason,
-        timestamp: new Date()
-      });
-    });
+    try {
+      window.addEventListener('error', (event) => {
+        try {
+          this.trackEvent('error', 'javascript_error', {
+            message: event.message,
+            filename: event.filename,
+            line: event.lineno,
+            column: event.colno,
+            stack: event.error?.stack,
+            timestamp: new Date()
+          });
+        } catch (trackingError) {
+          console.warn('Error tracking failed:', trackingError);
+        }
+      }, { passive: true });
+
+      window.addEventListener('unhandledrejection', (event) => {
+        try {
+          this.trackEvent('error', 'promise_rejection', {
+            reason: event.reason,
+            timestamp: new Date()
+          });
+        } catch (trackingError) {
+          console.warn('Promise rejection tracking failed:', trackingError);
+        }
+      }, { passive: true });
+    } catch (error) {
+      console.warn('Failed to setup error tracking:', error);
+    }
   }
   
   // Conversion Tracking

@@ -8,6 +8,7 @@ import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CallProvider } from "./contexts/CallContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import PageTransition from "./components/ui/PageTransition";
 import Home from "./pages/Home";
@@ -198,26 +199,38 @@ const App = () => {
   }, [analytics]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <AuthProvider>
-            <CallProvider>
-              <BrowserRouter>
-                <DevelopmentModeIndicator />
-                <AnimatedRoutes />
-                {/* Global Call Components */}
-                <VideoCallInterface />
-                <IncomingCallNotification />
-                <JoinCallBanner />
-              </BrowserRouter>
-            </CallProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ErrorBoundary
+      onError={(error, errorInfo) => {
+        // Track errors in analytics
+        analytics.trackEvent('error', 'app_error_boundary', {
+          message: error.message,
+          stack: error.stack,
+          componentStack: errorInfo.componentStack,
+          timestamp: new Date(),
+        });
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AuthProvider>
+              <CallProvider>
+                <BrowserRouter>
+                  <DevelopmentModeIndicator />
+                  <AnimatedRoutes />
+                  {/* Global Call Components */}
+                  <VideoCallInterface />
+                  <IncomingCallNotification />
+                  <JoinCallBanner />
+                </BrowserRouter>
+              </CallProvider>
+            </AuthProvider>
+          </TooltipProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

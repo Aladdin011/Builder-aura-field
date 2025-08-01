@@ -19,11 +19,20 @@ export default function ChatMessage({
   onFollowUpClick,
 }: ChatMessageProps) {
   const formatMessage = (text: string) => {
-    // Convert **bold** to <strong> tags
-    const boldFormatted = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    // Sanitize input to prevent XSS
+    const sanitized = text
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
 
-    // Convert 🏗️ **text** patterns to properly formatted text
-    return boldFormatted;
+    // Convert **bold** to <strong> tags (safe after sanitization)
+    const boldFormatted = sanitized.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+    // Convert newlines to <br> tags
+    const withLineBreaks = boldFormatted.replace(/\n/g, '<br>');
+
+    return withLineBreaks;
   };
 
   return (

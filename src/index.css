@@ -1,5 +1,6 @@
 /* Import Modern Design System */
 @import "./styles/modern-design-system.css";
+@import "./styles/glassmorphism.css";
 
 @tailwind base;
 @tailwind components;

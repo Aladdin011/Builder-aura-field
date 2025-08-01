@@ -1,0 +1,9 @@
+total 40
+drwxr-xr-x  4 root root 4096 Aug  1 14:19 .
+drwxr-xr-x 10 root root 4096 Aug  1 14:21 ..
+drwxr-xr-x  2 root root 4096 Aug  1 14:19 assets
+-rw-r--r--  1 root root 9544 Aug  1 14:19 favicon.ico
+drwxr-xr-x  2 root root 4096 Aug  1 14:19 images
+-rw-r--r--  1 root root 1572 Aug  1 14:19 index.html
+-rw-r--r--  1 root root 3253 Aug  1 14:19 placeholder.svg
+-rw-r--r--  1 root root  160 Aug  1 14:19 robots.txt

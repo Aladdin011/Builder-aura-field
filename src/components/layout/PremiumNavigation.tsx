@@ -373,11 +373,11 @@ export default function PremiumNavigation() {
         <motion.div
           className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-500"
           style={{
-            width: `${Math.min((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100, 100)}%`
+            width: `${Math.min((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100, 100)}%`,
+            transformOrigin: "left"
           }}
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transformOrigin="left"
         />
       </motion.header>
 

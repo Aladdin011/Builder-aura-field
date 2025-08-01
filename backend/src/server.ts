@@ -84,10 +84,7 @@ app.use(compression());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: isDevelopment ? 1000 : 100, // Limit each IP to 100 requests per windowMs
-  message: {
-    error: "Too many requests from this IP, please try again later.",
-    code: "RATE_LIMIT_EXCEEDED",
-  },
+  message: "Too many requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -95,10 +92,7 @@ const limiter = rateLimit({
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // Limit each IP to 5 auth requests per windowMs
-  message: {
-    error: "Too many authentication attempts, please try again later.",
-    code: "AUTH_RATE_LIMIT_EXCEEDED",
-  },
+  message: "Too many authentication attempts, please try again later.",
   skipSuccessfulRequests: true,
 });
 

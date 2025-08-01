@@ -16,18 +16,29 @@ async function uploadToHostinger() {
 
   try {
     console.log('🚀 Starting upload to Hostinger...')
-    
-    // FTP Configuration from environment variables
-    const config = {
-      host: process.env.VITE_FTP_HOST,
-      user: process.env.VITE_FTP_USERNAME,
-      password: process.env.VITE_FTP_PASSWORD,
-      port: parseInt(process.env.VITE_FTP_PORT) || 21,
-      secure: false // Set to true if using FTPS
-    }
+
+    // FTP Configuration from environment variables - try multiple formats
+    const configs = [
+      // Try with full domain username first
+      {
+        host: process.env.VITE_FTP_HOST,
+        user: process.env.VITE_FTP_USERNAME,
+        password: process.env.VITE_FTP_PASSWORD,
+        port: parseInt(process.env.VITE_FTP_PORT) || 21,
+        secure: false
+      },
+      // Try with just the user part before the dot
+      {
+        host: process.env.VITE_FTP_HOST,
+        user: process.env.VITE_FTP_USERNAME?.split('.')[0] || process.env.VITE_FTP_USERNAME,
+        password: process.env.VITE_FTP_PASSWORD,
+        port: parseInt(process.env.VITE_FTP_PORT) || 21,
+        secure: false
+      }
+    ]
 
     // Validate configuration
-    if (!config.host || !config.user || !config.password) {
+    if (!configs[0].host || !configs[0].user || !configs[0].password) {
       console.error('❌ Missing FTP credentials in .env file')
       console.log('Please add your Hostinger FTP credentials to .env:')
       console.log('VITE_FTP_HOST=your-ftp-host.com')
@@ -36,11 +47,36 @@ async function uploadToHostinger() {
       return
     }
 
-    console.log(`📡 Connecting to ${config.host}...`)
-    console.log(`👤 Username: ${config.user}`)
-    console.log(`🔑 Password: ${config.password.substring(0, 3)}***`)
-    
-    await client.access(config)
+    let connected = false
+    let config = null
+
+    // Try different authentication methods
+    for (let i = 0; i < configs.length && !connected; i++) {
+      config = configs[i]
+      console.log(`📡 Attempt ${i + 1}: Connecting to ${config.host}...`)
+      console.log(`👤 Username: ${config.user}`)
+      console.log(`🔑 Password: ${config.password.substring(0, 3)}***`)
+
+      try {
+        await client.access(config)
+        connected = true
+        console.log('✅ Connected successfully!')
+      } catch (authError) {
+        console.log(`❌ Attempt ${i + 1} failed: ${authError.message}`)
+        if (i < configs.length - 1) {
+          console.log('🔄 Trying alternative credentials...')
+          client.close()
+          // Create new client for next attempt
+          const newClient = new ftp.Client()
+          newClient.ftp.verbose = true
+          Object.assign(client, newClient)
+        }
+      }
+    }
+
+    if (!connected) {
+      throw new Error('All authentication attempts failed')
+    }
 
     // Navigate to the remote directory
     const remotePath = process.env.VITE_FTP_REMOTE_PATH || 'public_html'
