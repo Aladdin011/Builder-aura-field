@@ -561,6 +561,62 @@ body {
   }
 }
 
+/* === SUNSET REVEAL ANIMATION === */
+.sunset-panel {
+  position: relative;
+  overflow: hidden;
+  will-change: transform, opacity, clip-path;
+  isolation: isolate;
+}
+
+.sunset-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 2s ease-in-out;
+  z-index: 1;
+}
+
+.sunset-panel.revealed::before {
+  left: 100%;
+}
+
+.sunset-content {
+  position: relative;
+  z-index: 2;
+  mix-blend-mode: normal;
+}
+
+/* Hero exit animation styles */
+.hero-exit-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.hero-exit-container.exiting {
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* Enhanced layering for complex animations */
+.z-layer-1 { z-index: 1; }
+.z-layer-2 { z-index: 2; }
+.z-layer-3 { z-index: 3; }
+.z-layer-4 { z-index: 4; }
+.z-layer-5 { z-index: 5; }
+.z-layer-10 { z-index: 10; }
+.z-layer-20 { z-index: 20; }
+.z-layer-50 { z-index: 50; }
+.z-layer-100 { z-index: 100; }
+
 /* === PRINT STYLES === */
 @media print {
   .btn-primary-premium,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import PremiumLayout from "@/components/layout/PremiumLayout";
 import PremiumNavigation from "@/components/layout/PremiumNavigation";
@@ -11,6 +11,7 @@ import PremiumTestimonials from "@/components/sections/home/PremiumTestimonials"
 import CallToActionSection from "@/components/sections/home/CallToActionSection";
 import BlogPreview from "@/components/sections/home/BlogPreview";
 import { CustomCursor } from "@/components/ui/CustomCursor";
+import SunsetReveal from "@/components/ui/SunsetReveal";
 import { useAppStore, usePerformanceMonitoring } from "@/stores/appStore";
 import { usePersonalization, useLeadScoring } from "@/lib/personalization";
 import { useAdvancedAnimations } from "@/lib/advancedAnimations";
@@ -71,6 +72,8 @@ const sectionVariants = {
 export default function Home() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
 
   // Enhanced state management
@@ -89,9 +92,20 @@ export default function Home() {
   // Performance monitoring
   usePerformanceMonitoring();
 
+  // Hero exit animation when scrolling to next section
+  const { scrollYProgress: heroScrollProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+
   // Parallax effect for hero background
   const heroY = useTransform(scrollY, [0, 500], [0, 150]);
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0.5]);
+  
+  // Hero exit transforms - move the hero background up and out of view
+  const heroExitY = useTransform(heroScrollProgress, [0.7, 1], ["0%", "-100%"]);
+  const heroExitOpacity = useTransform(heroScrollProgress, [0.6, 0.9], [1, 0]);
+  const heroExitScale = useTransform(heroScrollProgress, [0.7, 1], [1, 0.95]);
 
   // Enhanced mouse tracking with analytics
   useEffect(() => {
@@ -189,35 +203,76 @@ export default function Home() {
       <PremiumNavigation />
       <PremiumLayout hideNavigation>
         <motion.div
+          ref={pageRef}
           variants={pageVariants}
           initial="initial"
           animate="animate"
           exit="exit"
           className="relative"
         >
+          {/* Premium Hero Section with Exit Animation */}
+          <motion.section
+            ref={heroRef}
+            id="hero"
+            className="relative z-20"
+            style={{
+              y: heroExitY,
+              opacity: heroExitOpacity,
+              scale: heroExitScale,
+            }}
+          >
+            <PremiumHero />
+          </motion.section>
+
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
             className="relative"
           >
-            {/* Premium Hero Section */}
-            <motion.section
-              id="hero"
-              variants={sectionVariants}
-              className="relative"
+            {/* Premium Services with Sunset Reveal Animation */}
+            <SunsetReveal
+              panels={[
+                {
+                  id: 'panel-1',
+                  content: 'PREMIUM',
+                  backgroundColor: 'linear-gradient(135deg, #7C5841 0%, #AA7452 100%)',
+                  height: '150px',
+                },
+                {
+                  id: 'panel-2', 
+                  content: 'SERVICES',
+                  backgroundColor: 'linear-gradient(135deg, #051822 0%, #2D383E 100%)',
+                  height: '200px',
+                },
+                {
+                  id: 'panel-3',
+                  content: 'EXPERIENCE',
+                  backgroundColor: 'linear-gradient(135deg, #AA7452 0%, #D4C9C7 100%)',
+                  height: '120px',
+                },
+                {
+                  id: 'panel-4',
+                  content: 'INNOVATION',
+                  backgroundColor: 'linear-gradient(135deg, #2D383E 0%, #7C5841 100%)',
+                  height: '180px',
+                },
+                {
+                  id: 'panel-5',
+                  content: 'EXCELLENCE',
+                  backgroundColor: 'linear-gradient(135deg, #051822 0%, #AA7452 100%)',
+                  height: '140px',
+                },
+              ]}
             >
-              <PremiumHero />
-            </motion.section>
-
-            {/* Premium Services */}
-            <motion.section
-              id="services"
-              variants={sectionVariants}
-              className="relative"
-            >
-              <PremiumServices />
-            </motion.section>
+              <motion.section
+                id="services"
+                variants={sectionVariants}
+                className="relative z-10"
+              >
+                <PremiumServices />
+              </motion.section>
+            </SunsetReveal>
 
             {/* Platform Hub */}
             <motion.section
