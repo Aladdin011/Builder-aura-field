@@ -212,7 +212,7 @@ export default function Register() {
                   <img
                     src="/images/brand/logo.jpg"
                     alt="JD Marc Limited Logo"
-                    className="h-12 w-auto mx-auto filter brightness-0 invert"
+                    className="h-16 w-auto mx-auto object-contain"
                   />
                 </Link>
                 <CardTitle className="text-2xl font-bold text-white mb-2">

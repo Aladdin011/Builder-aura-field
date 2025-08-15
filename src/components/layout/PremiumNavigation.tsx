@@ -29,6 +29,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/stores/appStore';
 import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
+import SmartLogo from '@/components/ui/SmartLogo';
 
 interface NavItem {
   label: string;
@@ -526,14 +527,15 @@ export default function PremiumNavigation() {
             whileTap={{ scale: 0.98 }}
           >
             <motion.div
-              className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300 border border-white/20"
+              className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300 border border-white/20"
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.3 }}
             >
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets%2Fbd53220f2be44e7b823f6284706cc662%2F74072840a2e04ede8037ff70b072ee1d?format=webp&width=200"
+              <SmartLogo
+                size="md"
+                variant="light"
                 alt="JD Marc Limited Professional Logo"
-                className="w-10 h-10 object-contain drop-shadow-lg"
+                className="drop-shadow-lg"
               />
             </motion.div>
             <div className="hidden sm:block">

@@ -1,1 +1,3 @@
 node_modules
+# Don't ignore dist folder (uncomment if you want to track build files)
+!dist/

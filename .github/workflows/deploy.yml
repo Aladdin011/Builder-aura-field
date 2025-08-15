@@ -1,0 +1,48 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main, glow-nest ]  # Deploy on pushes to main or glow-nest branch
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run type check
+      run: npm run typecheck
+      
+    - name: Build application
+      run: npm run build
+      
+    - name: Deploy to GitHub Pages (if main branch)
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
+        
+    # Alternative: Deploy to Hostinger via FTP
+    # - name: Deploy to Hostinger
+    #   if: github.ref == 'refs/heads/main'
+    #   uses: SamKirkland/FTP-Deploy-Action@4.3.3
+    #   with:
+    #     server: your-hostinger-ftp-server.com
+    #     username: ${{ secrets.FTP_USERNAME }}
+    #     password: ${{ secrets.FTP_PASSWORD }}
+    #     local-dir: ./dist/
+    #     server-dir: /public_html/
