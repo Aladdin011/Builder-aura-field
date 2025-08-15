@@ -26,7 +26,7 @@
 
     <script>
       (function() {
-        var attempts = 0; var maxAttempts = 20; // ~2s
+        var attempts = 0; var maxAttempts = 300; // ~30s
         function tryInit() {
           try {
             var er = window.eruda;
@@ -37,10 +37,16 @@
           } catch (e) {}
           if (++attempts < maxAttempts) setTimeout(tryInit, 100);
         }
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', tryInit, { once: true });
+        function schedule() {
+          tryInit();
+          document.addEventListener('visibilitychange', function(){ if (!document.hidden) tryInit(); });
+          window.addEventListener('load', tryInit);
         }
-        tryInit();
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', schedule, { once: true });
+        } else {
+          schedule();
+        }
       })();
     </script>
   </head>
