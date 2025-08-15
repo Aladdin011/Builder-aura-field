@@ -1,6 +1,0 @@
-import{c as o,a as s,j as d,b as t}from"./index-CyYdcpMP.js";/**
- * @license lucide-react v0.448.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */const p=o("CircleAlert",[["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}],["line",{x1:"12",x2:"12",y1:"8",y2:"12",key:"1pkeuh"}],["line",{x1:"12",x2:"12.01",y1:"16",y2:"16",key:"4dfq90"}]]),c=s.forwardRef(({className:e,...a},r)=>d.jsx("div",{ref:r,className:t("rounded-lg border bg-card text-card-foreground shadow-sm",e),...a}));c.displayName="Card";const l=s.forwardRef(({className:e,...a},r)=>d.jsx("div",{ref:r,className:t("flex flex-col space-y-1.5 p-6",e),...a}));l.displayName="CardHeader";const i=s.forwardRef(({className:e,...a},r)=>d.jsx("h3",{ref:r,className:t("text-2xl font-semibold leading-none tracking-tight",e),...a}));i.displayName="CardTitle";const n=s.forwardRef(({className:e,...a},r)=>d.jsx("p",{ref:r,className:t("text-sm text-muted-foreground",e),...a}));n.displayName="CardDescription";const x=s.forwardRef(({className:e,...a},r)=>d.jsx("div",{ref:r,className:t("p-6 pt-0",e),...a}));x.displayName="CardContent";const m=s.forwardRef(({className:e,...a},r)=>d.jsx("div",{ref:r,className:t("flex items-center p-6 pt-0",e),...a}));m.displayName="CardFooter";export{c as C,l as a,i as b,n as c,x as d,p as e};
