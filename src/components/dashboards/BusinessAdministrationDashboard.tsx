@@ -562,6 +562,7 @@ export default function BusinessAdministrationDashboard() {
 
   return (
     <DashboardThemeWrapper
+      department="business-administration"
       title="Business Administration Command Center"
       description="Organization-wide KPIs, approval workflows, policy management, and governance oversight for JD Marc Limited."
     >

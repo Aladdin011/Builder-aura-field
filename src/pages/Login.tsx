@@ -387,7 +387,7 @@ export default function Login() {
                 <img
                   src="/images/brand/logo.jpg"
                   alt="JD Marc Limited Logo"
-                  className="h-16 w-auto filter brightness-0 invert"
+                  className="h-20 w-auto object-contain mx-auto"
                 />
               </div>
 

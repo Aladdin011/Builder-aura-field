@@ -48,6 +48,7 @@ import ProjectDashboard from "@/components/dashboards/ProjectDashboard";
 import AccountsDashboard from "@/components/dashboards/AccountsDashboard";
 import HRDashboard from "@/components/dashboards/HRDashboard";
 import DigitalMarketingDashboard from "@/components/dashboards/DigitalMarketingDashboard";
+import DashboardErrorBoundary from "@/components/dashboards/DashboardErrorBoundary";
 
 interface ProjectItem {
   id: string;
@@ -87,28 +88,60 @@ export default function Dashboard() {
 
     // Admin users get admin dashboard
     if (isAdmin) {
-      return <AdminDashboard />;
+      return (
+        <DashboardErrorBoundary>
+          <AdminDashboard />
+        </DashboardErrorBoundary>
+      );
     }
 
-    // Route based on department
+    // Route based on department - wrapped in error boundaries
     switch (user.department) {
       case "secretariat-admin":
-        return <SecretariatDashboard />;
+        return (
+          <DashboardErrorBoundary>
+            <SecretariatDashboard />
+          </DashboardErrorBoundary>
+        );
       case "business-development":
-        return <BusinessDevelopmentDashboard />;
+        return (
+          <DashboardErrorBoundary>
+            <BusinessDevelopmentDashboard />
+          </DashboardErrorBoundary>
+        );
       case "business-administration":
-        return <BusinessAdministrationDashboard />;
+        return (
+          <DashboardErrorBoundary>
+            <BusinessAdministrationDashboard />
+          </DashboardErrorBoundary>
+        );
       case "project-management":
       case "project": // Support both naming conventions
-        return <ProjectDashboard />;
+        return (
+          <DashboardErrorBoundary>
+            <ProjectDashboard />
+          </DashboardErrorBoundary>
+        );
       case "accounting":
       case "account": // Support both naming conventions
-        return <AccountsDashboard />;
+        return (
+          <DashboardErrorBoundary>
+            <AccountsDashboard />
+          </DashboardErrorBoundary>
+        );
       case "human-resources":
       case "hr": // Support both naming conventions
-        return <HRDashboard />;
+        return (
+          <DashboardErrorBoundary>
+            <HRDashboard />
+          </DashboardErrorBoundary>
+        );
       case "digital-marketing":
-        return <DigitalMarketingDashboard />;
+        return (
+          <DashboardErrorBoundary>
+            <DigitalMarketingDashboard />
+          </DashboardErrorBoundary>
+        );
       default:
         // General dashboard for users without specific department assignment
         return (

@@ -213,9 +213,12 @@ export default function ForgotPassword() {
                   className="inline-block mb-4 hover:opacity-80 transition-opacity"
                 >
                   <img
-                    src="https://cdn.builder.io/api/v1/image/assets%2F751ea84be0da437c8dd3f1bf04173189%2F6982878bae124d2589b95f89b1a5cf5b?format=webp&width=200"
+                    src="/images/brand/logo.jpg"
                     alt="JD Marc Limited Logo"
-                    className="h-12 w-auto mx-auto filter brightness-0 invert"
+                    className="h-16 w-auto mx-auto object-contain"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://cdn.builder.io/api/v1/image/assets%2F751ea84be0da437c8dd3f1bf04173189%2F6982878bae124d2589b95f89b1a5cf5b?format=webp&width=200";
+                    }}
                   />
                 </Link>
                 <CardTitle className="text-2xl font-bold text-white mb-2">

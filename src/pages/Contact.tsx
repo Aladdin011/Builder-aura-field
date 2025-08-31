@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Clock, 
-  CheckCircle, 
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  CheckCircle,
+  AlertCircle,
   Globe,
   Building2,
   Users,
@@ -235,14 +236,60 @@ const ContactForm = () => {
   const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormStatus("submitting");
 
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      const formData = new FormData(e.target as HTMLFormElement);
+
+      // Extract form data
+      const submitData = {
+        name: formData.get('name') as string,
+        email: formData.get('email') as string,
+        phone: formData.get('phone') as string,
+        company: formData.get('company') as string,
+        projectType: formData.get('project-type') as string,
+        location: formData.get('location') as string,
+        description: formData.get('description') as string,
+        files: uploadedFiles
+      };
+
+      // Validate required fields
+      if (!submitData.name || !submitData.email || !submitData.phone || !submitData.description) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      console.log('Submitting contact form:', submitData);
+
+      // TODO: Replace with actual API call
+      // const response = await fetch('/api/contact', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(submitData)
+      // });
+
+      // Simulate API call for now
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
       setFormStatus("success");
-    }, 2000);
+
+      // Reset form after successful submission
+      setTimeout(() => {
+        (e.target as HTMLFormElement).reset();
+        setUploadedFiles([]);
+        setFormStatus("idle");
+      }, 3000);
+
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setFormStatus("error");
+
+      // Reset error status after 5 seconds
+      setTimeout(() => {
+        setFormStatus("idle");
+      }, 5000);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -350,6 +397,7 @@ const ContactForm = () => {
               </Label>
               <Input
                 id={field.id}
+                name={field.id}
                 type={field.type}
                 placeholder={field.placeholder}
                 required={field.required}
@@ -379,7 +427,7 @@ const ContactForm = () => {
             <Label htmlFor="project-type" className="text-[#051822] font-semibold">
               Project Type <span className="text-red-500">*</span>
             </Label>
-            <Select>
+            <Select name="project-type">
               <SelectTrigger className="h-14 rounded-2xl border-2 border-gray-200 focus:border-[#AA7452] text-lg">
                 <SelectValue placeholder="Select project type" />
               </SelectTrigger>
@@ -401,6 +449,7 @@ const ContactForm = () => {
             </Label>
             <Input
               id="location"
+              name="location"
               placeholder="Lagos, Nigeria"
               required
               className="h-14 rounded-2xl border-2 border-gray-200 focus:border-[#AA7452] text-lg"
@@ -414,6 +463,7 @@ const ContactForm = () => {
           </Label>
           <Textarea
             id="description"
+            name="description"
             placeholder="Please describe your project requirements, timeline, budget range, and any specific needs. The more details you provide, the better we can assist you..."
             rows={6}
             required
@@ -505,8 +555,11 @@ const ContactForm = () => {
           type="submit"
           disabled={formStatus === "submitting"}
           className={cn(
-            "w-full bg-gradient-to-r from-[#AA7452] to-[#7C5841] text-white py-6 rounded-2xl font-black text-xl transition-all duration-300 flex items-center justify-center gap-3",
-            formStatus === "submitting" && "opacity-70 cursor-not-allowed"
+            "w-full py-6 rounded-2xl font-black text-xl transition-all duration-300 flex items-center justify-center gap-3",
+            formStatus === "submitting" && "opacity-70 cursor-not-allowed",
+            formStatus === "success" && "bg-gradient-to-r from-green-600 to-green-700 text-white",
+            formStatus === "error" && "bg-gradient-to-r from-red-600 to-red-700 text-white",
+            formStatus === "idle" && "bg-gradient-to-r from-[#AA7452] to-[#7C5841] text-white"
           )}
           whileHover={{ scale: formStatus === "submitting" ? 1 : 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
@@ -519,6 +572,16 @@ const ContactForm = () => {
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               />
               Submitting Your Project...
+            </>
+          ) : formStatus === "success" ? (
+            <>
+              <CheckCircle className="w-6 h-6" />
+              Message Sent Successfully!
+            </>
+          ) : formStatus === "error" ? (
+            <>
+              <AlertCircle className="w-6 h-6" />
+              Failed to Send - Please Try Again
             </>
           ) : (
             <>

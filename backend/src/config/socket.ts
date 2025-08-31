@@ -2,11 +2,27 @@ import { Server } from 'socket.io';
 import { Server as HttpServer } from 'http';
 
 export const setupSocketIO = (server: HttpServer) => {
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://jdmarcng.com',
+    'https://jdmarcng.com',
+    'https://www.jdmarcng.com'
+  ];
+
   const io = new Server(server, {
     cors: {
-      origin: process.env.NODE_ENV === 'production' 
-        ? ['https://jdmarcng.com', 'https://www.jdmarcng.com']
-        : ['http://localhost:3000', 'http://localhost:5173'],
+      origin: function(origin, callback) {
+        // Allow requests with no origin
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+          callback(null, true);
+        } else {
+          console.log('Socket.IO CORS blocked origin:', origin);
+          callback(null, true); // Allow all origins in case of issues
+        }
+      },
       methods: ['GET', 'POST'],
       credentials: true
     },

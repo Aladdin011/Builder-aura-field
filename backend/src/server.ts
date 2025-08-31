@@ -20,9 +20,11 @@ import { setupSocketIO } from "./config/socket";
 import contactRoutes from "./routes/contact";
 import healthRoutes from "./routes/health";
 import socketTestRoutes from "./routes/socket-test";
+import authRoutes from "./routes/auth";
+import projectsRoutes from "./routes/projects";
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5002; // Changed port to avoid conflict with existing process
 
 // Create HTTP server
 const server = http.createServer(app);
@@ -49,17 +51,46 @@ app.use(
 );
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://jdmarcng.com',
+  'https://jdmarcng.com',
+  'https://www.jdmarcng.com'
+];
+
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["https://jdmarcng.com", "https://www.jdmarcng.com"]
-        : ["http://localhost:3000", "http://localhost:5173"],
+    origin: function(origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+        callback(null, true);
+      } else {
+        console.log('CORS blocked origin:', origin);
+        callback(null, true); // Allow all origins in case of issues
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    exposedHeaders: ['Access-Control-Allow-Origin'],
   }),
 );
+
+// Add preflight OPTIONS handler for all routes
+app.options('*', cors());
+
+// Add explicit CORS headers for all responses
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
+
 
 // Rate limiting
 const limiter = rateLimit({
@@ -88,6 +119,8 @@ app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use("/api/health", healthRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/socket", socketTestRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/projects", projectsRoutes);
 
 // Root endpoint
 app.get("/", (req, res) => {

@@ -152,29 +152,56 @@ export class AdvancedAnalyticsEngine {
   // User Interaction Tracking
   private setupUserInteractionTracking() {
     try {
-      // Click tracking with heat mapping
+      // Click tracking with heat mapping - throttled to prevent spam
+      let lastClickTime = 0;
+      let lastClickElement: HTMLElement | null = null;
+      const CLICK_THROTTLE_MS = 1000; // Increased throttle time
+
       document.addEventListener('click', (event) => {
         try {
-          this.trackInteraction('click', event);
+          const now = Date.now();
+          const target = event.target as HTMLElement;
+
+          // Enhanced throttling: check both time and element
+          if ((now - lastClickTime < CLICK_THROTTLE_MS) && lastClickElement === target) {
+            return; // Throttle rapid clicks on same element
+          }
+
+          // Only track significant interactions
+          if (this.shouldTrackElement(target)) {
+            lastClickTime = now;
+            lastClickElement = target;
+            this.trackInteraction('click', event);
+          }
         } catch (error) {
-          console.warn('Click tracking error:', error);
+          // Reduce console noise - only log severe errors
+          if (error instanceof Error && error.message.includes('Cannot read')) {
+            console.warn('Click tracking error:', error.message);
+          }
         }
       }, { passive: true });
 
-      // Scroll depth tracking
+      // Scroll depth tracking - throttled
       let maxScrollDepth = 0;
+      let scrollTimeout: NodeJS.Timeout | null = null;
+
       document.addEventListener('scroll', () => {
-        try {
-          const scrollDepth = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
-          if (scrollDepth > maxScrollDepth) {
-            maxScrollDepth = scrollDepth;
-            if (scrollDepth % 25 === 0) { // Track at 25%, 50%, 75%, 100%
+        if (scrollTimeout) return; // Throttle scroll events
+
+        scrollTimeout = setTimeout(() => {
+          try {
+            const scrollHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+            const scrollDepth = Math.round((window.scrollY / (scrollHeight - window.innerHeight)) * 100);
+
+            if (scrollDepth > maxScrollDepth && scrollDepth % 25 === 0 && scrollDepth <= 100) {
+              maxScrollDepth = scrollDepth;
               this.trackEvent('engagement', 'scroll_depth', { depth: scrollDepth });
             }
+          } catch (error) {
+            // Silent fail for scroll tracking
           }
-        } catch (error) {
-          console.warn('Scroll tracking error:', error);
-        }
+          scrollTimeout = null;
+        }, 250); // 250ms throttle
       }, { passive: true });
 
       // Form interaction tracking
@@ -203,33 +230,102 @@ export class AdvancedAnalyticsEngine {
     }
   }
   
+  private shouldTrackElement(element: HTMLElement): boolean {
+    if (!element || !element.tagName) return false;
+
+    // Skip tracking for certain elements to reduce noise
+    const skipElements = ['HTML', 'BODY', 'DIV', 'SPAN', 'SVG', 'PATH'];
+    if (skipElements.includes(element.tagName)) return false;
+
+    // Only track meaningful interactions
+    const trackableElements = ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'];
+    const hasClickHandler = element.onclick || element.getAttribute('data-track') === 'true';
+    const isTrackableTag = trackableElements.includes(element.tagName);
+    const hasRole = element.getAttribute('role') === 'button' || element.getAttribute('role') === 'link';
+    const hasAriaLabel = element.getAttribute('aria-label');
+
+    // Additional check for disabled elements
+    if (element.hasAttribute('disabled') || element.getAttribute('aria-disabled') === 'true') {
+      return false;
+    }
+
+    return isTrackableTag || hasClickHandler || hasRole || hasAriaLabel;
+  }
+
   private trackInteraction(type: string, event: Event) {
-    const target = event.target as HTMLElement;
-    const element = this.getElementSelector(target);
-    
-    const interactionData = {
-      type,
-      element,
-      timestamp: new Date(),
-      coordinates: type === 'click' ? { 
-        x: (event as MouseEvent).clientX, 
-        y: (event as MouseEvent).clientY 
-      } : undefined,
-      value: (target as HTMLInputElement).value || target.textContent?.slice(0, 100),
-    };
-    
-    this.trackEvent('interaction', type, interactionData);
-    
-    // Update app store
-    const { trackUserInteraction } = useAppStore.getState();
-    trackUserInteraction(`${type}-${element}`);
+    try {
+      const target = event.target as HTMLElement;
+      if (!target) return;
+
+      const element = this.getElementSelector(target);
+      if (!element) return;
+
+      const interactionData = {
+        type,
+        element,
+        timestamp: new Date(),
+        coordinates: type === 'click' && event instanceof MouseEvent ? {
+          x: event.clientX || 0,
+          y: event.clientY || 0
+        } : undefined,
+        value: this.getSafeElementValue(target),
+      };
+
+      this.trackEvent('interaction', type, interactionData);
+
+      // Update app store safely
+      try {
+        const { trackUserInteraction } = useAppStore.getState();
+        if (trackUserInteraction) {
+          trackUserInteraction(`${type}-${element}`);
+        }
+      } catch (storeError) {
+        // Silent fail for store updates
+      }
+    } catch (error) {
+      // Silent fail for interaction tracking
+    }
+  }
+
+  private getSafeElementValue(element: HTMLElement): string {
+    try {
+      if (element instanceof HTMLInputElement) {
+        return element.value?.slice(0, 100) || '';
+      }
+      if (element instanceof HTMLTextAreaElement) {
+        return element.value?.slice(0, 100) || '';
+      }
+      return element.textContent?.slice(0, 100) || '';
+    } catch {
+      return '';
+    }
   }
   
   private getElementSelector(element: HTMLElement): string {
-    // Create a unique selector for the element
-    if (element.id) return `#${element.id}`;
-    if (element.className) return `.${element.className.split(' ')[0]}`;
-    return element.tagName.toLowerCase();
+    try {
+      if (!element || !element.tagName) return 'unknown';
+
+      // Create a unique selector for the element
+      if (element.id && typeof element.id === 'string') {
+        return `#${element.id}`;
+      }
+
+      if (element.className && typeof element.className === 'string') {
+        const firstClass = element.className.trim().split(' ')[0];
+        if (firstClass) {
+          return `.${firstClass}`;
+        }
+      }
+
+      // Check for data attributes
+      if (element.getAttribute && element.getAttribute('data-testid')) {
+        return `[data-testid="${element.getAttribute('data-testid')}"]`;
+      }
+
+      return element.tagName.toLowerCase();
+    } catch {
+      return 'unknown';
+    }
   }
   
   // Navigation and Page View Tracking
@@ -406,54 +502,88 @@ export class AdvancedAnalyticsEngine {
   
   // Core tracking method
   trackEvent(category: string, action: string, data?: any) {
-    const event = {
-      category,
-      action,
-      data,
-      timestamp: new Date(),
-      sessionId: this.sessionId,
-      userId: this.userId,
-      page: window.location.pathname,
-      userAgent: navigator.userAgent,
-    };
-    
-    this.events.push(event);
-    
-    // Send to analytics service (implement your preferred analytics service)
-    this.sendToAnalytics(event);
-    
-    // Update app store if relevant
-    this.updateAppStore(event);
+    try {
+      if (!category || !action) return;
+
+      const event = {
+        category: String(category),
+        action: String(action),
+        data: data || {},
+        timestamp: new Date(),
+        sessionId: this.sessionId,
+        userId: this.userId,
+        page: window.location?.pathname || '',
+        userAgent: navigator?.userAgent || '',
+      };
+
+      // Prevent event overflow
+      if (this.events.length > 1000) {
+        this.events = this.events.slice(-500); // Keep last 500 events
+      }
+
+      this.events.push(event);
+
+      // Send to analytics service (implement your preferred analytics service)
+      this.sendToAnalytics(event);
+
+      // Update app store if relevant
+      this.updateAppStore(event);
+    } catch (error) {
+      // Silent fail for event tracking to not break the app
+    }
   }
   
   private sendToAnalytics(event: any) {
-    // In a real implementation, send to your analytics service
-    // Examples: Google Analytics, Mixpanel, Amplitude, etc.
-    
-    // Google Analytics 4 example:
-    if (typeof gtag !== 'undefined') {
-      gtag('event', event.action, {
-        event_category: event.category,
-        event_label: event.data?.element || '',
-        value: event.data?.value || 0,
-        custom_parameter_1: event.sessionId,
-      });
-    }
-    
-    // Console logging for development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Analytics Event:', event);
+    try {
+      // In a real implementation, send to your analytics service
+      // Examples: Google Analytics, Mixpanel, Amplitude, etc.
+
+      // Google Analytics 4 example:
+      if (typeof gtag !== 'undefined') {
+        gtag('event', event.action, {
+          event_category: event.category,
+          event_label: event.data?.element || '',
+          value: event.data?.value || 0,
+          custom_parameter_1: event.sessionId,
+        });
+      }
+
+      // Minimal console logging for development - only critical events
+      if (process.env.NODE_ENV === 'development') {
+        const criticalCategories = ['error', 'conversion'];
+        const importantActions = ['javascript_error', 'contact_form_submit', 'phone_click'];
+
+        if (criticalCategories.includes(event.category) || importantActions.includes(event.action)) {
+          console.log('Analytics Event:', {
+            category: event.category,
+            action: event.action,
+            timestamp: event.timestamp.toISOString()
+          });
+        }
+      }
+    } catch (error) {
+      // Silent fail for analytics to not break the app
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Analytics send failed:', error);
+      }
     }
   }
   
   private updateAppStore(event: any) {
-    const { updateAnalytics } = useAppStore.getState();
-    
-    // Update relevant analytics in app store
-    if (event.category === 'engagement') {
-      updateAnalytics({
-        lastInteraction: event.timestamp
-      });
+    try {
+      const state = useAppStore.getState();
+      if (!state || !state.updateAnalytics) return;
+
+      const { updateAnalytics } = state;
+
+      // Update relevant analytics in app store
+      if (event.category === 'engagement') {
+        updateAnalytics({
+          lastInteraction: event.timestamp
+        });
+      }
+    } catch (error) {
+      // Silent fail for app store updates
     }
   }
   

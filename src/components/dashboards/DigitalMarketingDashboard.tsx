@@ -359,6 +359,7 @@ export default function DigitalMarketingDashboard() {
 
   return (
     <DashboardThemeWrapper
+      department="digital-marketing"
       title="Digital Marketing Command Center"
       description="Comprehensive multi-channel marketing analytics, automation, and campaign management for JD Marc Limited."
     >

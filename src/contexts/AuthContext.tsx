@@ -15,12 +15,14 @@ interface User {
   isVerified?: boolean;
   lastLoginAt?: string;
   createdAt?: string;
+  department?: string;
 }
 
 // Auth context interface
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   isLoading: boolean;
   login: (
     credentials: LoginCredentials,
@@ -80,6 +82,7 @@ const mockUsers: User[] = [
     isVerified: true,
     lastLoginAt: new Date().toISOString(),
     createdAt: "2023-01-01T00:00:00.000Z",
+    department: "secretariat-admin",
   },
   {
     id: "2",
@@ -93,6 +96,63 @@ const mockUsers: User[] = [
     isVerified: true,
     lastLoginAt: new Date().toISOString(),
     createdAt: "2023-01-15T00:00:00.000Z",
+    department: "business-development",
+  },
+  {
+    id: "3",
+    email: "project@jdmarcng.com",
+    firstName: "Project",
+    lastName: "Manager",
+    role: "user",
+    company: "JD Marc Limited",
+    phone: "+234 555 123 4567",
+    location: "Lagos, Nigeria",
+    isVerified: true,
+    lastLoginAt: new Date().toISOString(),
+    createdAt: "2023-01-20T00:00:00.000Z",
+    department: "project-management",
+  },
+  {
+    id: "4",
+    email: "hr@jdmarcng.com",
+    firstName: "HR",
+    lastName: "Manager",
+    role: "user",
+    company: "JD Marc Limited",
+    phone: "+234 555 234 5678",
+    location: "Abuja, Nigeria",
+    isVerified: true,
+    lastLoginAt: new Date().toISOString(),
+    createdAt: "2023-01-25T00:00:00.000Z",
+    department: "human-resources",
+  },
+  {
+    id: "5",
+    email: "accounting@jdmarcng.com",
+    firstName: "Finance",
+    lastName: "Manager",
+    role: "user",
+    company: "JD Marc Limited",
+    phone: "+234 555 345 6789",
+    location: "Abuja, Nigeria",
+    isVerified: true,
+    lastLoginAt: new Date().toISOString(),
+    createdAt: "2023-02-01T00:00:00.000Z",
+    department: "accounting",
+  },
+  {
+    id: "6",
+    email: "marketing@jdmarcng.com",
+    firstName: "Marketing",
+    lastName: "Specialist",
+    role: "user",
+    company: "JD Marc Limited",
+    phone: "+234 555 456 7890",
+    location: "Lagos, Nigeria",
+    isVerified: true,
+    lastLoginAt: new Date().toISOString(),
+    createdAt: "2023-02-10T00:00:00.000Z",
+    department: "digital-marketing",
   },
 ];
 
@@ -178,16 +238,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           user: userData,
         };
       } catch (apiError) {
-        console.warn(
-          "Backend unavailable, using development mode for login",
-        );
+        console.warn("Backend unavailable, using development mode for login");
 
         // Mock authentication for development when backend is unavailable
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
 
-        const mockUser = mockUsers.find(
-          (u) => u.email === credentials.email,
-        );
+        const mockUser = mockUsers.find((u) => u.email === credentials.email);
 
         if (mockUser && credentials.password === "password123") {
           const updatedUser = {
@@ -273,9 +329,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API delay
 
         // Check if email already exists in mock users
-        const existingUser = mockUsers.find(
-          (u) => u.email === userData.email,
-        );
+        const existingUser = mockUsers.find((u) => u.email === userData.email);
 
         if (existingUser) {
           setIsLoading(false);
@@ -470,6 +524,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
+    isAdmin: !!user && user.role === "admin",
     isLoading,
     login,
     register,

@@ -426,6 +426,7 @@ export default function ProjectDashboard() {
 
   return (
     <DashboardThemeWrapper
+      department="project"
       title="Project Management Command Center"
       description="Comprehensive project oversight, resource management, and team coordination for JD Marc Limited."
     >

@@ -389,9 +389,12 @@ export default function Footer() {
                 transition={{ duration: 0.3 }}
               >
                 <img
-                  src="https://cdn.builder.io/api/v1/image/assets%2F751ea84be0da437c8dd3f1bf04173189%2F8c27ff3f82824383bd700bc3410cfa09?format=webp&width=200"
+                  src="/images/brand/logo.jpg"
                   alt="JD Marc Limited Logo"
-                  className="w-12 h-12 object-contain"
+                  className="w-14 h-14 object-contain rounded-lg"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://cdn.builder.io/api/v1/image/assets%2F751ea84be0da437c8dd3f1bf04173189%2F8c27ff3f82824383bd700bc3410cfa09?format=webp&width=200";
+                  }}
                 />
               </motion.div>
               <div>

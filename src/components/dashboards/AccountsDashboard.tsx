@@ -89,6 +89,7 @@ export default function AccountsDashboard() {
 
   return (
     <DashboardThemeWrapper
+      department="accounts"
       title="Accounting & Finance Dashboard"
       description="Manage invoices, track payments, and monitor financial health"
     >

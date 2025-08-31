@@ -519,6 +519,7 @@ export default function SecretariatDashboard() {
 
   return (
     <DashboardThemeWrapper
+      department="secretariat"
       title="Executive Secretariat Command Center"
       description="Comprehensive administrative support, scheduling, and executive assistance for JD Marc Limited leadership."
     >

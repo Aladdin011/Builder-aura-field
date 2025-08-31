@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown,
   ArrowRight,
@@ -23,20 +23,22 @@ import {
   Mail,
   Award,
   Sparkles,
-  Globe
-} from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAppStore } from '@/stores/appStore';
-import { useTheme } from '@/contexts/ThemeContext';
-import { cn } from '@/lib/utils';
+  Globe,
+} from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAppStore } from "@/stores/appStore";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
+import SmartLogo from "@/components/ui/SmartLogo";
 
 interface NavItem {
   label: string;
   href: string;
   icon?: React.ReactNode;
-  subItems?: { 
-    label: string; 
-    href: string; 
+  subItems?: {
+    label: string;
+    href: string;
     description?: string;
     icon?: React.ReactNode;
   }[];
@@ -44,78 +46,78 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    label: 'Services',
-    href: '/services',
+    label: "Services",
+    href: "/services",
     subItems: [
-      { 
-        label: 'Residential Construction', 
-        href: '/services/residential', 
-        description: 'Modern homes and residential communities',
-        icon: <Home className="w-5 h-5" />
+      {
+        label: "Residential Construction",
+        href: "/services/residential",
+        description: "Modern homes and residential communities",
+        icon: <Home className="w-5 h-5" />,
       },
-      { 
-        label: 'Commercial Buildings', 
-        href: '/services/commercial', 
-        description: 'Office complexes and commercial spaces',
-        icon: <Building2 className="w-5 h-5" />
+      {
+        label: "Commercial Buildings",
+        href: "/services/commercial",
+        description: "Office complexes and commercial spaces",
+        icon: <Building2 className="w-5 h-5" />,
       },
-      { 
-        label: 'Infrastructure Development', 
-        href: '/services/infrastructure', 
-        description: 'Roads, bridges, and public utilities',
-        icon: <Settings className="w-5 h-5" />
+      {
+        label: "Infrastructure Development",
+        href: "/services/infrastructure",
+        description: "Roads, bridges, and public utilities",
+        icon: <Settings className="w-5 h-5" />,
       },
-      { 
-        label: 'Smart Cities & Urban Planning', 
-        href: '/services/smart-cities', 
-        description: 'Technology-integrated urban development',
-        icon: <Zap className="w-5 h-5" />
+      {
+        label: "Smart Cities & Urban Planning",
+        href: "/services/smart-cities",
+        description: "Technology-integrated urban development",
+        icon: <Zap className="w-5 h-5" />,
       },
-    ]
+    ],
   },
   {
-    label: 'Blog',
-    href: '/blog',
+    label: "Blog",
+    href: "/blog",
     subItems: [
       {
-        label: 'Industry Insights',
-        href: '/blog/industry',
-        description: 'Latest construction & infrastructure trends',
-        icon: <Target className="w-5 h-5" />
+        label: "Industry Insights",
+        href: "/blog/industry",
+        description: "Latest construction & infrastructure trends",
+        icon: <Target className="w-5 h-5" />,
       },
       {
-        label: 'Project Updates',
-        href: '/blog/projects',
-        description: 'Behind-the-scenes project coverage',
-        icon: <Building2 className="w-5 h-5" />
+        label: "Project Updates",
+        href: "/blog/projects",
+        description: "Behind-the-scenes project coverage",
+        icon: <Building2 className="w-5 h-5" />,
       },
       {
-        label: 'Technology & Innovation',
-        href: '/blog/technology',
-        description: 'Smart construction & sustainable building',
-        icon: <Zap className="w-5 h-5" />
+        label: "Technology & Innovation",
+        href: "/blog/technology",
+        description: "Smart construction & sustainable building",
+        icon: <Zap className="w-5 h-5" />,
       },
       {
-        label: 'Company News',
-        href: '/blog/news',
-        description: 'JD Marc Limited updates & announcements',
-        icon: <Award className="w-5 h-5" />
+        label: "Company News",
+        href: "/blog/news",
+        description: "JD Marc Limited updates & announcements",
+        icon: <Award className="w-5 h-5" />,
       },
-    ]
+    ],
   },
-  { label: 'Projects', href: '/projects' },
-  { label: 'About', href: '/about' },
+  { label: "Projects", href: "/projects" },
+  { label: "About", href: "/about" },
 ];
 
 // Enhanced Premium Dropdown Component
-const PremiumDropdown = ({ 
-  item, 
-  isOpen, 
+const PremiumDropdown = ({
+  item,
+  isOpen,
   onToggle,
-  onClose 
-}: { 
-  item: NavItem; 
-  isOpen: boolean; 
+  onClose,
+}: {
+  item: NavItem;
+  isOpen: boolean;
   onToggle: () => void;
   onClose: () => void;
 }) => {
@@ -131,17 +133,20 @@ const PremiumDropdown = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
 
@@ -160,9 +165,9 @@ const PremiumDropdown = ({
         >
           <ChevronDown className="w-4 h-4" />
         </motion.div>
-        
+
         {/* Enhanced hover underline */}
-        <motion.div 
+        <motion.div
           className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#AA7452] to-[#7C5841] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-full"
           initial={{ scaleX: 0 }}
           whileHover={{ scaleX: 1 }}
@@ -192,7 +197,9 @@ const PremiumDropdown = ({
                 {item.subItems.map((subItem, index) => (
                   <motion.button
                     key={subItem.label}
-                    onClick={() => handleSubItemClick(subItem.href, subItem.label)}
+                    onClick={() =>
+                      handleSubItemClick(subItem.href, subItem.label)
+                    }
                     className="w-full text-left p-4 rounded-2xl hover:bg-gradient-to-r hover:from-[#AA7452]/10 hover:to-[#7C5841]/10 transition-all duration-300 group border border-transparent hover:border-[#AA7452]/20"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -200,7 +207,7 @@ const PremiumDropdown = ({
                     whileHover={{ scale: 1.02, x: 5 }}
                   >
                     <div className="flex items-start gap-4">
-                      <motion.div 
+                      <motion.div
                         className="w-12 h-12 bg-gradient-to-r from-[#AA7452]/20 to-[#7C5841]/20 rounded-xl flex items-center justify-center text-[#AA7452] group-hover:scale-110 transition-transform duration-300"
                         whileHover={{ rotate: 360 }}
                         transition={{ duration: 0.6 }}
@@ -237,7 +244,7 @@ const PremiumDropdown = ({
                     Need consultation?
                   </div>
                   <motion.button
-                    onClick={() => handleSubItemClick('/contact', 'Contact')}
+                    onClick={() => handleSubItemClick("/contact", "Contact")}
                     className="text-[#AA7452] font-semibold text-sm hover:text-[#7C5841] transition-colors flex items-center gap-1"
                     whileHover={{ x: 3 }}
                   >
@@ -255,7 +262,13 @@ const PremiumDropdown = ({
 };
 
 // Enhanced Mobile Menu Component
-const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+const MobileMenu = ({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { trackUserInteraction } = useAppStore();
@@ -279,13 +292,13 @@ const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
-          
+
           {/* Enhanced Menu Panel */}
           <motion.div
             className="fixed top-0 right-0 h-full w-full max-w-md bg-gradient-to-b from-white to-gray-50 z-50 overflow-y-auto"
-            initial={{ x: '100%' }}
+            initial={{ x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            exit={{ x: "100%" }}
             transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             <div className="p-8">
@@ -300,8 +313,12 @@ const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                     />
                   </div>
                   <div>
-                    <div className="text-xl font-black text-[#051822]">JD Marc</div>
-                    <div className="text-sm text-gray-600">Construction Excellence</div>
+                    <div className="text-xl font-black text-[#051822]">
+                      JD Marc
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      Construction Excellence
+                    </div>
                   </div>
                 </div>
                 <motion.button
@@ -321,7 +338,7 @@ const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                     key={item.label}
                     initial={{ opacity: 0, x: 50 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 + (index * 0.05) }}
+                    transition={{ delay: 0.1 + index * 0.05 }}
                   >
                     <motion.button
                       onClick={() => handleNavClick(item.href, item.label)}
@@ -329,22 +346,32 @@ const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                         "w-full flex items-center justify-between p-4 rounded-2xl text-left transition-all duration-300",
                         location.pathname === item.href
                           ? "bg-gradient-to-r from-[#AA7452]/20 to-[#7C5841]/20 text-[#051822] border border-[#AA7452]/30"
-                          : "text-[#051822] hover:bg-gray-100"
+                          : "text-[#051822] hover:bg-gray-100",
                       )}
                       whileHover={{ scale: 1.02, x: 5 }}
                       whileTap={{ scale: 0.98 }}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={cn(
-                          "w-10 h-10 rounded-xl flex items-center justify-center",
-                          location.pathname === item.href
-                            ? "bg-gradient-to-r from-[#AA7452] to-[#7C5841] text-white"
-                            : "bg-gray-100 text-gray-600"
-                        )}>
-                          {item.label === 'Services' && <Construction className="w-5 h-5" />}
-                          {item.label === 'Blog' && <Award className="w-5 h-5" />}
-                          {item.label === 'Projects' && <Building2 className="w-5 h-5" />}
-                          {item.label === 'About' && <Users className="w-5 h-5" />}
+                        <div
+                          className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center",
+                            location.pathname === item.href
+                              ? "bg-gradient-to-r from-[#AA7452] to-[#7C5841] text-white"
+                              : "bg-gray-100 text-gray-600",
+                          )}
+                        >
+                          {item.label === "Services" && (
+                            <Construction className="w-5 h-5" />
+                          )}
+                          {item.label === "Blog" && (
+                            <Award className="w-5 h-5" />
+                          )}
+                          {item.label === "Projects" && (
+                            <Building2 className="w-5 h-5" />
+                          )}
+                          {item.label === "About" && (
+                            <Users className="w-5 h-5" />
+                          )}
                         </div>
                         <span className="font-semibold">{item.label}</span>
                       </div>
@@ -357,7 +384,7 @@ const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
               </nav>
 
               {/* Enhanced Contact Info */}
-              <motion.div 
+              <motion.div
                 className="mb-8 p-6 bg-gradient-to-r from-[#AA7452]/10 to-[#7C5841]/10 rounded-3xl border border-[#AA7452]/20"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -368,14 +395,14 @@ const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                   Quick Contact
                 </h4>
                 <div className="space-y-3">
-                  <a 
+                  <a
                     href="tel:+2348037065497"
                     className="flex items-center gap-3 text-gray-700 hover:text-[#AA7452] transition-colors"
                   >
                     <Phone className="w-4 h-4" />
                     <span className="text-sm">+234 803 706 5497</span>
                   </a>
-                  <a 
+                  <a
                     href="mailto:info@jdmarcng.com"
                     className="flex items-center gap-3 text-gray-700 hover:text-[#AA7452] transition-colors"
                   >
@@ -390,7 +417,7 @@ const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
               </motion.div>
 
               {/* Enhanced Theme Toggle */}
-              <motion.div 
+              <motion.div
                 className="mb-8 p-6 bg-white rounded-2xl shadow-lg border border-gray-200"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -402,9 +429,9 @@ const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { value: 'light', icon: Sun, label: 'Light' },
-                    { value: 'dark', icon: Moon, label: 'Dark' },
-                    { value: 'system', icon: Building2, label: 'Auto' }
+                    { value: "light", icon: Sun, label: "Light" },
+                    { value: "dark", icon: Moon, label: "Dark" },
+                    { value: "system", icon: Building2, label: "Auto" },
                   ].map(({ value, icon: Icon, label }) => (
                     <motion.button
                       key={value}
@@ -413,7 +440,7 @@ const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                         "flex flex-col items-center gap-2 p-3 rounded-xl border transition-all duration-300",
                         theme === value
                           ? "border-[#AA7452] bg-[#AA7452]/10 text-[#051822]"
-                          : "border-gray-200 hover:border-gray-300 text-gray-600"
+                          : "border-gray-200 hover:border-gray-300 text-gray-600",
                       )}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.98 }}
@@ -426,30 +453,45 @@ const MobileMenu = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
               </motion.div>
 
               {/* Enhanced Auth Buttons */}
-              <motion.div 
+              <motion.div
                 className="space-y-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                <motion.button 
-                  onClick={() => handleNavClick('/login', 'Login')}
-                  className="w-full flex items-center justify-center gap-3 p-4 border-2 border-[#AA7452] rounded-2xl text-[#AA7452] hover:bg-[#AA7452] hover:text-white font-bold transition-all duration-300"
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <LogIn className="w-5 h-5" />
-                  <span>Sign In</span>
-                </motion.button>
-                <motion.button 
-                  onClick={() => handleNavClick('/register', 'Register')}
-                  className="w-full flex items-center justify-center gap-3 p-4 bg-gradient-to-r from-[#AA7452] to-[#7C5841] text-white rounded-2xl hover:shadow-lg hover:shadow-[#AA7452]/30 font-bold transition-all duration-300"
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <UserPlus className="w-5 h-5" />
-                  <span>Get Started</span>
-                </motion.button>
+                {!isAuthenticated && (
+                  <>
+                    <motion.button
+                      onClick={() => handleNavClick("/login", "Login")}
+                      className="w-full flex items-center justify-center gap-3 p-4 border-2 border-[#AA7452] rounded-2xl text-[#AA7452] hover:bg-[#AA7452] hover:text-white font-bold transition-all duration-300"
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <LogIn className="w-5 h-5" />
+                      <span>Sign In</span>
+                    </motion.button>
+                    <motion.button
+                      onClick={() => handleNavClick("/register", "Register")}
+                      className="w-full flex items-center justify-center gap-3 p-4 bg-gradient-to-r from-[#AA7452] to-[#7C5841] text-white rounded-2xl hover:shadow-lg hover:shadow-[#AA7452]/30 font-bold transition-all duration-300"
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <UserPlus className="w-5 h-5" />
+                      <span>Get Started</span>
+                    </motion.button>
+                  </>
+                )}
+                {isAuthenticated && (
+                  <motion.button
+                    onClick={() => handleNavClick("/dashboard", "Dashboard")}
+                    className="w-full flex items-center justify-center gap-3 p-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-2xl hover:shadow-lg hover:shadow-green-600/30 font-bold transition-all duration-300"
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Building2 className="w-5 h-5" />
+                    <span>Go to Dashboard</span>
+                  </motion.button>
+                )}
               </motion.div>
             </div>
           </motion.div>
@@ -463,21 +505,22 @@ export default function PremiumNavigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  
+
   const location = useLocation();
   const navigate = useNavigate();
   const { trackUserInteraction } = useAppStore();
   const { theme, setTheme, actualTheme } = useTheme();
+  const { login, isAuthenticated } = useAuth();
 
   // Apply construction color system
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--primary-dark', '#051822');
-    root.style.setProperty('--secondary-dark', '#2D383E');
-    root.style.setProperty('--accent-warm', '#7C5841');
-    root.style.setProperty('--accent-light', '#AA7452');
-    root.style.setProperty('--neutral-mid', '#969A9E');
-    root.style.setProperty('--neutral-light', '#D4C9C7');
+    root.style.setProperty("--primary-dark", "#051822");
+    root.style.setProperty("--secondary-dark", "#2D383E");
+    root.style.setProperty("--accent-warm", "#7C5841");
+    root.style.setProperty("--accent-light", "#AA7452");
+    root.style.setProperty("--neutral-mid", "#969A9E");
+    root.style.setProperty("--neutral-light", "#D4C9C7");
   }, []);
 
   // Enhanced scroll effect
@@ -486,8 +529,8 @@ export default function PremiumNavigation() {
       setIsScrolled(window.scrollY > 50);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleNavClick = (href: string, label: string) => {
@@ -500,8 +543,8 @@ export default function PremiumNavigation() {
   };
 
   const handleLogoClick = () => {
-    trackUserInteraction('nav-logo');
-    navigate('/');
+    trackUserInteraction("nav-logo");
+    navigate("/");
   };
 
   return (
@@ -509,9 +552,9 @@ export default function PremiumNavigation() {
       <motion.header
         className={cn(
           "header-premium fixed top-0 w-full z-50 transition-all duration-500",
-          isScrolled 
-            ? "bg-gradient-to-r from-[#051822]/95 to-[#2D383E]/95 backdrop-blur-2xl shadow-2xl border-b border-white/10" 
-            : "bg-gradient-to-r from-[#051822]/90 to-[#2D383E]/90 backdrop-blur-xl border-b border-white/5"
+          isScrolled
+            ? "bg-gradient-to-r from-[#051822]/95 to-[#2D383E]/95 backdrop-blur-2xl shadow-2xl border-b border-white/10"
+            : "bg-gradient-to-r from-[#051822]/90 to-[#2D383E]/90 backdrop-blur-xl border-b border-white/5",
         )}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -530,10 +573,11 @@ export default function PremiumNavigation() {
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.3 }}
             >
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets%2Fbd53220f2be44e7b823f6284706cc662%2F74072840a2e04ede8037ff70b072ee1d?format=webp&width=200"
+              <SmartLogo
+                size="md"
+                variant="light"
                 alt="JD Marc Limited Professional Logo"
-                className="w-10 h-10 object-contain drop-shadow-lg"
+                className="drop-shadow-lg"
               />
             </motion.div>
             <div className="hidden sm:block">
@@ -564,15 +608,17 @@ export default function PremiumNavigation() {
                       "nav-item px-4 py-3 rounded-2xl transition-all duration-300 relative group font-medium",
                       location.pathname === item.href
                         ? "text-white bg-white/10"
-                        : "text-white/90 hover:text-white hover:bg-white/5"
+                        : "text-white/90 hover:text-white hover:bg-white/5",
                     )}
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <span>{item.label}</span>
-                    <motion.div 
+                    <motion.div
                       className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#AA7452] to-[#7C5841] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-full"
-                      initial={{ scaleX: location.pathname === item.href ? 1 : 0 }}
+                      initial={{
+                        scaleX: location.pathname === item.href ? 1 : 0,
+                      }}
                       whileHover={{ scaleX: 1 }}
                     />
                   </motion.button>
@@ -584,18 +630,20 @@ export default function PremiumNavigation() {
           {/* Enhanced Desktop CTA & Theme Toggle */}
           <div className="nav-cta hidden lg:flex items-center gap-6">
             {/* Enhanced Theme Toggle */}
-            <motion.div 
+            <motion.div
               className="relative w-16 h-8 bg-black/40 border border-white/30 rounded-full p-1 cursor-pointer backdrop-blur-sm"
-              onClick={() => setTheme(actualTheme === 'light' ? 'dark' : 'light')}
+              onClick={() =>
+                setTheme(actualTheme === "light" ? "dark" : "light")
+              }
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <motion.div
                 className="relative w-6 h-6 bg-gradient-to-r from-white to-gray-100 rounded-full shadow-lg flex items-center justify-center"
-                animate={{ x: actualTheme === 'dark' ? 0 : 32 }}
+                animate={{ x: actualTheme === "dark" ? 0 : 32 }}
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
               >
-                {actualTheme === 'dark' ? (
+                {actualTheme === "dark" ? (
                   <Moon className="w-3 h-3 text-blue-600" />
                 ) : (
                   <Sun className="w-3 h-3 text-orange-500" />
@@ -604,22 +652,36 @@ export default function PremiumNavigation() {
             </motion.div>
 
             {/* Enhanced Auth Buttons */}
-            <motion.button
-              onClick={() => handleNavClick('/login', 'Login')}
-              className="btn-secondary px-6 py-3 bg-transparent border-2 border-white/30 rounded-2xl text-white hover:text-[#051822] hover:bg-white hover:border-white transition-all duration-300 font-medium"
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Sign In
-            </motion.button>
-            <motion.button
-              onClick={() => handleNavClick('/register', 'Register')}
-              className="btn-primary px-6 py-3 bg-gradient-to-r from-[#AA7452] to-[#7C5841] text-white rounded-2xl hover:shadow-lg hover:shadow-[#AA7452]/30 transition-all duration-300 font-bold"
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Get Started
-            </motion.button>
+            {!isAuthenticated && (
+              <>
+                <motion.button
+                  onClick={() => handleNavClick("/login", "Login")}
+                  className="btn-secondary px-6 py-3 bg-transparent border-2 border-white/30 rounded-2xl text-white hover:text-[#051822] hover:bg-white hover:border-white transition-all duration-300 font-medium"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Sign In
+                </motion.button>
+                <motion.button
+                  onClick={() => handleNavClick("/register", "Register")}
+                  className="btn-primary px-6 py-3 bg-gradient-to-r from-[#AA7452] to-[#7C5841] text-white rounded-2xl hover:shadow-lg hover:shadow-[#AA7452]/30 transition-all duration-300 font-bold"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Get Started
+                </motion.button>
+              </>
+            )}
+            {isAuthenticated && (
+              <motion.button
+                onClick={() => handleNavClick("/dashboard", "Dashboard")}
+                className="btn-primary px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-2xl hover:shadow-lg hover:shadow-green-600/30 transition-all duration-300 font-bold"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Go to Dashboard
+              </motion.button>
+            )}
           </div>
 
           {/* Enhanced Mobile Menu Toggle */}
@@ -630,22 +692,22 @@ export default function PremiumNavigation() {
             whileTap={{ scale: 0.9 }}
           >
             <div className="space-y-2">
-              <motion.span 
+              <motion.span
                 className="block w-6 h-0.5 bg-white transition-all duration-300"
-                animate={{ 
+                animate={{
                   rotate: isMobileMenuOpen ? 45 : 0,
-                  y: isMobileMenuOpen ? 8 : 0 
+                  y: isMobileMenuOpen ? 8 : 0,
                 }}
               />
-              <motion.span 
+              <motion.span
                 className="block w-6 h-0.5 bg-white transition-all duration-300"
                 animate={{ opacity: isMobileMenuOpen ? 0 : 1 }}
               />
-              <motion.span 
+              <motion.span
                 className="block w-6 h-0.5 bg-white transition-all duration-300"
-                animate={{ 
+                animate={{
                   rotate: isMobileMenuOpen ? -45 : 0,
-                  y: isMobileMenuOpen ? -8 : 0 
+                  y: isMobileMenuOpen ? -8 : 0,
                 }}
               />
             </div>
@@ -654,7 +716,7 @@ export default function PremiumNavigation() {
       </motion.header>
 
       {/* Enhanced Mobile Menu */}
-      <MobileMenu 
+      <MobileMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
       />

@@ -451,6 +451,7 @@ export default function AccountingDashboard() {
 
   return (
     <DashboardThemeWrapper
+      department="accounting"
       title="Financial Management Center"
       description="Comprehensive accounting, budgeting, and financial analytics for JD Marc Limited."
     >

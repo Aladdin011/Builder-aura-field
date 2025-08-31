@@ -35,6 +35,8 @@ import {
   UserPlus,
   FileText,
   BarChart3,
+  LogOut,
+  ChevronDown,
 } from "lucide-react";
 
 interface DashboardProps {
@@ -139,6 +141,7 @@ export default function ModernDashboardLayout({
   children,
 }: DashboardProps) {
   const { isInCall, startCall } = useCall();
+  const { logout } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [jobs] = useState<JobItem[]>([
     {
@@ -292,17 +295,30 @@ export default function ModernDashboardLayout({
               <Download className="h-4 w-4 mr-2" />
               Export Data
             </Button>
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-white text-gray-800">
-                  {user?.firstName?.[0]}{user?.lastName?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-white">
-                <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-                <p className="text-xs text-white/70">{department}</p>
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-auto p-0 hover:bg-white/10">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-white text-gray-800">
+                        {user?.firstName?.[0]}{user?.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="text-white text-left">
+                      <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
+                      <p className="text-xs text-white/70">{department}</p>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-white/70" />
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => logout()} className="text-red-600 focus:text-red-600">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

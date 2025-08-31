@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCall } from "@/contexts/CallContext";
+import { useAdvancedAnalytics } from "@/lib/advancedAnalytics";
 import ModernDashboardLayout from "./ModernDashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -95,6 +96,7 @@ interface PerformanceMetric {
 export default function HRDashboard() {
   const { user } = useAuth();
   const { isInCall, startCall } = useCall();
+  const { trackEvent } = useAdvancedAnalytics();
   
   const [employees] = useState<Employee[]>([
     {
@@ -287,10 +289,36 @@ export default function HRDashboard() {
   };
 
   const handleStartHRMeeting = () => {
+    trackEvent('interaction', 'hr_meeting_start', { department: 'human-resources' });
     startCall("hr-team-meeting", {
       title: "HR Team Meeting",
       participants: [],
     });
+  };
+
+  const handleAddEmployee = () => {
+    trackEvent('interaction', 'add_employee_click', { department: 'human-resources' });
+    // TODO: Implement add employee functionality
+  };
+
+  const handlePostJob = () => {
+    trackEvent('interaction', 'post_job_click', { department: 'human-resources' });
+    // TODO: Implement post job functionality
+  };
+
+  const handleGenerateReport = () => {
+    trackEvent('interaction', 'generate_report_click', { department: 'human-resources' });
+    // TODO: Implement report generation
+  };
+
+  const handleApproveLeave = (requestId: string, employeeName: string) => {
+    trackEvent('interaction', 'approve_leave', { requestId, employeeName, department: 'human-resources' });
+    // TODO: Implement leave approval
+  };
+
+  const handleRejectLeave = (requestId: string, employeeName: string) => {
+    trackEvent('interaction', 'reject_leave', { requestId, employeeName, department: 'human-resources' });
+    // TODO: Implement leave rejection
   };
 
   const totalEmployees = employees.length;
@@ -497,11 +525,20 @@ export default function HRDashboard() {
                         </Badge>
                         {request.status === "pending" && (
                           <div className="flex items-center gap-2">
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                            <Button
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                              onClick={() => handleApproveLeave(request.id, request.employeeName)}
+                            >
                               <CheckCircle className="h-4 w-4 mr-1" />
                               Approve
                             </Button>
-                            <Button size="sm" variant="outline" className="border-red-500 text-red-500 hover:bg-red-50">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-red-500 text-red-500 hover:bg-red-50"
+                              onClick={() => handleRejectLeave(request.id, request.employeeName)}
+                            >
                               <UserX className="h-4 w-4 mr-1" />
                               Reject
                             </Button>
@@ -604,15 +641,27 @@ export default function HRDashboard() {
                     <Video className="h-4 w-4 mr-2" />
                     {isInCall ? "In Meeting" : "Start HR Meeting"}
                   </Button>
-                  <Button variant="outline" className="w-full border-green-600 text-green-600 hover:bg-green-50">
+                  <Button
+                    variant="outline"
+                    className="w-full border-green-600 text-green-600 hover:bg-green-50"
+                    onClick={handleAddEmployee}
+                  >
                     <UserPlus className="h-4 w-4 mr-2" />
                     Add New Employee
                   </Button>
-                  <Button variant="outline" className="w-full border-purple-600 text-purple-600 hover:bg-purple-50">
+                  <Button
+                    variant="outline"
+                    className="w-full border-purple-600 text-purple-600 hover:bg-purple-50"
+                    onClick={handlePostJob}
+                  >
                     <Briefcase className="h-4 w-4 mr-2" />
                     Post Job Opening
                   </Button>
-                  <Button variant="outline" className="w-full border-orange-600 text-orange-600 hover:bg-orange-50">
+                  <Button
+                    variant="outline"
+                    className="w-full border-orange-600 text-orange-600 hover:bg-orange-50"
+                    onClick={handleGenerateReport}
+                  >
                     <FileText className="h-4 w-4 mr-2" />
                     Generate Report
                   </Button>
